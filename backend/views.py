@@ -42,6 +42,13 @@ def logout(request):
         response['error'] = 'invalid request'
     return JsonResponse(response)
 
+def personality(request):
+    response = {'error': ''}
+    profile = get_profile(request, response)
+    if profile:
+        response['data'] = [x / 30 for x in range(30)] # dummy data
+    return JsonResponse(response)
+
 def get_profile(request, response):
     splits = request.META['HTTP_AUTHORIZATION'].split("Bearer ")
     if len(splits) == 2 and splits[0] == "":
