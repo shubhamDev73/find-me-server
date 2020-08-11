@@ -46,7 +46,13 @@ def personality(request):
     response = {'error': ''}
     profile = get_profile(request, response)
     if profile:
-        response['data'] = [x / 30 for x in range(30)] # dummy data
+        response['data'] = {
+            "fire": {"value": 0.678, "positive": True},
+            "water": {"value": 0.678, "positive": False},
+            "earth": {"value": 0.678, "positive": True},
+            "air": {"value": 0.678, "positive": False},
+            "space": {"value": 0.678, "positive": True},
+        } # dummy data
     return JsonResponse(response)
 
 def get_profile(request, response):
