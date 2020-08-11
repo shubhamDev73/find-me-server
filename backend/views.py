@@ -26,6 +26,8 @@ def login(request):
     if request.method == "POST":
         try:
             user = User.objects.get(username=request.POST['username'], password=request.POST['password'])
+            if user.profile.expired:
+                user.profile.new_token()
             response['token'] = user.profile.token
         except User.DoesNotExist:
             response['error'] = 'invalid login'
@@ -61,7 +63,10 @@ def get_profile(request, response):
         token = splits[1]
         try:
             profile = Profile.objects.get(token=token)
-            return profile
+            if profile.expired:
+                response['error'] = 'token expired'
+            else:
+                return profile
         except Profile.DoesNotExist:
             response['error'] = 'invalid token'
     else:
