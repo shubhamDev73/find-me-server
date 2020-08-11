@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from .models import Profile
+
 
 @csrf_exempt
 def register(request):
@@ -39,3 +41,15 @@ def logout(request):
     else:
         response['error'] = 'invalid request'
     return JsonResponse(response)
+
+def get_profile(request, response):
+    splits = request.META['HTTP_AUTHORIZATION'].split("Bearer ")
+    if len(splits) == 2 and splits[0] == "":
+        token = splits[1]
+        try:
+            profile = Profile.objects.get(token=token)
+            return profile
+        except Profile.DoesNotExist:
+            response['error'] = 'invalid token'
+    else:
+        response['error'] = 'invalid header'
