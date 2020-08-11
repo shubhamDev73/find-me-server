@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<h1>Documentation</h1>
+		<h2>Root node: /api/</h2>
+		<ul>
+			<h3>Authorization end-points. All are POST requests.</h3>
+			<li>/register/ : to register. data: username, password. returns "token": auth token</li>
+			<li>/login/ : to login. data: username, password. returns "token": auth token</li>
+			<li>/logout/ : to logout.</li>
+		</ul>
+		<ul>
+			<h3>User end-points. Require "Authorization: Bearer &lt;auth-token&gt;" as header. All are GET requests.</h3>
+			<li>/personality/ : retrieve user personality.</li>
+		</ul>
+		<h3>All response are in json format and contain "error" field which contains the error message if an error occured, otherwise empty.</h3>
+	</body>
+</html>
