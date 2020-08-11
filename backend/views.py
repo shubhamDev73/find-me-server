@@ -5,6 +5,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Profile
 
 
+def index(request):
+    return JsonResponse({"message": "API root node"})
+
 @csrf_exempt
 def register(request):
     response = {'error': ''}
