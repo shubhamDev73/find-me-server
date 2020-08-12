@@ -41,10 +41,10 @@ def login(request):
 @csrf_exempt
 def logout(request):
     response = {'error': ''}
-    if request.method == "POST":
-        pass
-    else:
-        response['error'] = 'invalid request'
+    profile = get_profile(request, response)
+    if profile:
+        profile.expired = True
+        profile.save()
     return JsonResponse(response)
 
 def me(request):

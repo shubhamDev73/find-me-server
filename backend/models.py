@@ -17,7 +17,7 @@ class Profile(models.Model):
         import random
         import string
 
-        random_string = ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
+        random_string = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=length))
         present = True
         while present:
             try:
