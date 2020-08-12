@@ -47,16 +47,24 @@ def logout(request):
         response['error'] = 'invalid request'
     return JsonResponse(response)
 
-def personality(request):
+def me(request):
     response = {'error': ''}
     profile = get_profile(request, response)
     if profile:
         response['data'] = {
-            "fire": {"value": 0.678, "positive": True},
-            "water": {"value": 0.678, "positive": False},
-            "earth": {"value": 0.678, "positive": True},
-            "air": {"value": 0.678, "positive": False},
-            "space": {"value": 0.678, "positive": True},
+            "nick": profile.user.username,
+            "personality": {
+                "fire": {"value": 0.678, "positive": True},
+                "water": {"value": 0.678, "positive": False},
+                "earth": {"value": 0.678, "positive": True},
+                "air": {"value": 0.678, "positive": False},
+                "space": {"value": 0.678, "positive": True},
+            },
+            "interests": [
+                {"name": "Coding", "amount": 3},
+                {"name": "Entrepreneurship", "amount": 2},
+                {"name": "TV Shows", "amount": 1},
+            ],
         } # dummy data
     return JsonResponse(response)
 
