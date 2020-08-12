@@ -15,7 +15,7 @@
 		</ul>
 		<ul>
 			<h3>User end-points. Require "Authorization: Bearer &lt;auth-token&gt;" as header. All are GET requests.</h3>
-			<li>/me/ : retrieve information about me. "nick", "personality", "interests".</li>
+			<li>/me/ : retrieve information about me. "nick", "avatar" (with mood), "avatar-base" (without mood), "personality", "interests", "mood".</li>
 		</ul>
 		<h3>All response are in json format and contain "error" field which contains the error message if an error occured, otherwise empty.</h3>
 		<h3>For authorization endpoints, auth token may expire due to security reasons. If this happens, ask user to login again.</h3>

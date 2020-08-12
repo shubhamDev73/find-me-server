@@ -53,6 +53,8 @@ def me(request):
     if profile:
         response['data'] = {
             "nick": profile.user.username,
+            "avatar": "https://media.vanityfair.com/photos/5ba12e6b6603312e2a5bbee8/master/w_768,c_limit/Avatar-The-Last-Airbender-Live-Action.jpg",
+            "avatar-base": "https://media.vanityfair.com/photos/5ba12e6b6603312e2a5bbee8/master/w_768,c_limit/Avatar-The-Last-Airbender-Live-Action.jpg",
             "personality": {
                 "fire": {"value": 0.678, "positive": True},
                 "water": {"value": 0.678, "positive": False},
@@ -65,6 +67,7 @@ def me(request):
                 {"name": "Entrepreneurship", "amount": 2},
                 {"name": "TV Shows", "amount": 1},
             ],
+            "mood": "cheerful",
         } # dummy data
     return JsonResponse(response)
 
