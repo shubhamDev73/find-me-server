@@ -12,19 +12,15 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
-    def new_token(self, length=100):
-        import hashlib
-        import random
-        import string
+    def new_token(self):
+        import secrets
 
-        random_string = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=length))
-        present = True
-        while present:
+        while True:
             try:
-                token = hashlib.sha256(random_string.encode('utf-8')).hexdigest()
+                token = secrets.token_hex(32)
                 Profile.objects.get(token=token)
             except Profile.DoesNotExist:
-                present = False
+                break
 
         self.token = token
         self.expired = False

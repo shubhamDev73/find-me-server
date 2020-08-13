@@ -76,16 +76,19 @@ def me(request):
     return JsonResponse(response)
 
 def get_profile(request, response):
-    splits = request.META['HTTP_AUTHORIZATION'].split("Bearer ")
-    if len(splits) == 2 and splits[0] == "":
-        token = splits[1]
-        try:
-            profile = Profile.objects.get(token=token)
-            if profile.expired:
-                response['error'] = 'token expired'
-            else:
-                return profile
-        except Profile.DoesNotExist:
-            response['error'] = 'invalid token'
-    else:
-        response['error'] = 'invalid header'
+    try:
+        splits = request.META['HTTP_AUTHORIZATION'].split("Bearer ")
+        if len(splits) == 2 and splits[0] == "":
+            token = splits[1]
+            try:
+                profile = Profile.objects.get(token=token)
+                if profile.expired:
+                    response['error'] = 'token expired'
+                else:
+                    return profile
+            except Profile.DoesNotExist:
+                response['error'] = 'invalid token'
+        else:
+            response['error'] = 'invalid header'
+    except:
+        response['error'] = 'invalid authorization'
