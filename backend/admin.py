@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Profile
+from .models import Profile, Connect
 
 
 @admin.register(Profile)
@@ -14,3 +14,5 @@ class ProfileAdmin(admin.ModelAdmin):
     expire_tokens.short_description = 'Expire auth tokens'
 
     actions = [expire_tokens]
+
+admin.site.register(Connect)

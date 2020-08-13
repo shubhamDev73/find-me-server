@@ -10,4 +10,6 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
 
     path('me/', views.me, name='me'),
+
+    path('found/', views.found, name='found'),
 ]

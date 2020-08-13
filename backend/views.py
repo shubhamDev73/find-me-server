@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Profile
+from .models import Profile, Connect
 
 
 def index(request):
@@ -73,6 +73,19 @@ def me(request):
             ],
             "mood": "cheerful",
         } # dummy data
+    return JsonResponse(response)
+
+def found(request):
+    response = {'error': ''}
+    profile = get_profile(request, response)
+    if profile:
+        connects = [(connect.user2, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user1=profile)]
+        connects += [(connect.user1, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user2=profile)]
+        response['data'] = [{
+            "nick": profile.user.username,
+            "avatar": "https://media.vanityfair.com/photos/5ba12e6b6603312e2a5bbee8/master/w_768,c_limit/Avatar-The-Last-Airbender-Live-Action.jpg",
+            "retained": retained
+        } for profile, retained in connects]
     return JsonResponse(response)
 
 def get_profile(request, response):
