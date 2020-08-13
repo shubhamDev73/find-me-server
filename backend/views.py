@@ -16,7 +16,8 @@ def register(request):
             User.objects.get(username=request.POST['username'])
             response['error'] = 'username already exists'
         except User.DoesNotExist:
-            user = User.objects.create(username=request.POST['username'], password=request.POST['password'])
+            user = User.objects.create(username=request.POST['username'])
+            user.set_password(request.POST['password'])
             user.save()
             response['token'] = user.profile.token
     else:
@@ -28,12 +29,15 @@ def login(request):
     response = {'error': ''}
     if request.method == "POST":
         try:
-            user = User.objects.get(username=request.POST['username'], password=request.POST['password'])
-            if user.profile.expired:
-                user.profile.new_token()
-            response['token'] = user.profile.token
+            user = User.objects.get(username=request.POST['username'])
+            if user.check_password(request.POST['password']):
+                if user.profile.expired:
+                    user.profile.new_token()
+                response['token'] = user.profile.token
+            else:
+                response['error'] = 'invalid password'
         except User.DoesNotExist:
-            response['error'] = 'invalid login'
+            response['error'] = 'not registered'
     else:
         response['error'] = 'invalid request'
     return JsonResponse(response)
