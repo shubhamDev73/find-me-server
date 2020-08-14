@@ -39,12 +39,28 @@ class Interest(models.Model):
     def __str__(self):
         return self.name
 
+class UserInterest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    interest = models.ForeignKey(Interest, on_delete=models.CASCADE)
+    amount = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.user) + " - " + str(self.interest) + ": " + str(self.amount)
+
 class Question(models.Model):
     interest = models.ForeignKey(Interest, on_delete=models.CASCADE)
     text = models.TextField()
 
     def __str__(self):
-        return self.text
+        return str(self.interest) + " - " + self.text
+
+class Answer(models.Model):
+    user_interest = models.ForeignKey(UserInterest, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    text = models.TextField()
+
+    def __str__(self):
+        return str(self.user_interest) + " - " + str(self.question) + ": " + self.text
 
 class Connect(models.Model):
     user1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='first_user')
@@ -54,4 +70,4 @@ class Connect(models.Model):
     retained2 = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user1.user.username + " - " + self.user2.user.username
+        return str(self.user1.user) + " - " + str(self.user2.user)

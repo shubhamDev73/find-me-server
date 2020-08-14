@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Profile, Interest, Question, Connect
+from .models import Profile, Interest, UserInterest, Question, Answer, Connect
 
 
 @admin.register(Profile)
@@ -17,9 +17,19 @@ class ProfileAdmin(admin.ModelAdmin):
 
 admin.site.register(Interest)
 
+@admin.register(UserInterest)
+class UserInterestAdmin(admin.ModelAdmin):
+
+    list_display = ['user', 'interest', 'amount']
+
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
 
     list_display = ['interest', 'text']
+
+@admin.register(Answer)
+class AnswerAdmin(admin.ModelAdmin):
+
+    list_display = ['user_interest', 'question', 'text']
 
 admin.site.register(Connect)

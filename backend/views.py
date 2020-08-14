@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Profile, Interest, Question, Connect
+from .models import Profile, Interest, UserInterest, Question, Answer, Connect
 
 
 def index(request):
@@ -66,13 +66,23 @@ def me(request):
                 "air": {"value": 0.678, "positive": False},
                 "space": {"value": 0.678, "positive": True},
             },
-            "interests": [
-                {"name": "Coding", "amount": 3},
-                {"name": "Entrepreneurship", "amount": 2},
-                {"name": "TV Shows", "amount": 1},
-            ],
+            "interests": [{"name": user_interest.interest.name, "amount": user_interest.amount} for user_interest in UserInterest.objects.filter(user=profile.user) ],
             "mood": "cheerful",
         } # dummy data
+    return JsonResponse(response)
+
+def me_interests(request):
+    response = {'error': ''}
+    profile = get_profile(request, response)
+    if profile:
+        response['data'] = []
+        user_interests = UserInterest.objects.filter(user=profile.user)
+        for user_interest in user_interests:
+            response['data'].append({
+                "name": user_interest.interest.name,
+                "amount": user_interest.amount,
+                "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
+            })
     return JsonResponse(response)
 
 def interests(request):
@@ -80,6 +90,44 @@ def interests(request):
     profile = get_profile(request, response)
     if profile:
         response['data'] = [{"id": interest.id, "name": interest.name} for interest in Interest.objects.all()]
+    return JsonResponse(response)
+
+def update_interests(request):
+    response = {'error': ''}
+    profile = get_profile(request, response)
+    if profile:
+        interests = [int(interest) for interest in request.GET['interests'].split(',')]
+        amounts = [int(amount) for amount in request.GET.get('amounts', '0').split(',')]
+        remove = request.GET.__contains__('remove')
+        user_interests = UserInterest.objects.filter(user=profile.user, interest__in=interests)
+        if remove:
+            user_interests.delete()
+        else:
+            for user_interest in user_interests:
+                index = interests.index(user_interest.interest.pk)
+                user_interest.amount = amounts[index]
+                user_interest.save()
+                amounts[index] = 0
+            for index, amount in enumerate(amounts):
+                if amount != 0:
+                    interest = Interest.objects.get(pk=interests[index])
+                    user_interest = UserInterest.objects.create(user=profile.user, interest=interest, amount=amount)
+                    user_interest.save()
+    return JsonResponse(response)
+
+def update_interest(request, pk):
+    response = {'error': ''}
+    profile = get_profile(request, response)
+    if profile:
+        question = Question.objects.get(pk=request.GET['question'])
+        user_interest = UserInterest.objects.get(user=profile.user, interest=pk)
+        text = request.GET['answer']
+        try:
+            answer = Answer.objects.get(user_interest=user_interest, question=question)
+            answer.text = text
+        except Answer.DoesNotExist:
+            answer = Answer.objects.create(user_interest=user_interest, question=question, text=text)
+        answer.save()
     return JsonResponse(response)
 
 def interest(request, pk):
