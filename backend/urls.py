@@ -11,5 +11,8 @@ urlpatterns = [
 
     path('me/', views.me, name='me'),
 
+    path('interests/', views.interests, name='interests'),
+    path('interests/<int:pk>/', views.interest, name='interest'),
+
     path('found/', views.found, name='found'),
 ]

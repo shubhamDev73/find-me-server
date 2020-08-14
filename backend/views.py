@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Profile, Connect
+from .models import Profile, Interest, Question, Connect
 
 
 def index(request):
@@ -73,6 +73,21 @@ def me(request):
             ],
             "mood": "cheerful",
         } # dummy data
+    return JsonResponse(response)
+
+def interests(request):
+    response = {'error': ''}
+    profile = get_profile(request, response)
+    if profile:
+        response['data'] = [{"id": interest.id, "name": interest.name} for interest in Interest.objects.all()]
+    return JsonResponse(response)
+
+def interest(request, pk):
+    response = {'error': ''}
+    profile = get_profile(request, response)
+    if profile:
+        interest = Interest.objects.get(pk=pk)
+        response['data'] = {"name": interest.name, "questions": [{"id": question.id, "text": question.text} for question in Question.objects.filter(interest=interest)]}
     return JsonResponse(response)
 
 def found(request):

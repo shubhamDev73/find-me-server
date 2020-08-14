@@ -16,6 +16,8 @@
 		<ul>
 			<h3>User end-points. Require "Authorization: Bearer &lt;auth-token&gt;" as header. All are GET requests.</h3>
 			<li>/me/ : retrieve information about me. "nick", "avatar" (with mood), "avatar-base" (without mood), "personality", "interests", "mood".</li>
+			<li>/interests/ : retrieve all interests. [ {"id", "name"}, {},..].</li>
+			<li>/interests/&lt;interest-id&gt; : retrieve all data for this interest id. {"name", "questions": [ {"id", "text"}, {},..]}.</li>
 			<li>/found/ : retrieve all users connected with me. [ {"nick", "avatar", "retained"}, {},..].</li>
 		</ul>
 		<h3>All response are in json format and contain "error" field which contains the error message if an error occured, otherwise empty.</h3>

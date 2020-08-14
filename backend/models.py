@@ -33,6 +33,19 @@ def create_user_profile(sender, instance, created, **kwargs):
         profile = Profile.objects.create(user=instance)
         profile.new_token()
 
+class Interest(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+class Question(models.Model):
+    interest = models.ForeignKey(Interest, on_delete=models.CASCADE)
+    text = models.TextField()
+
+    def __str__(self):
+        return self.text
+
 class Connect(models.Model):
     user1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='first_user')
     user2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='second_user')
