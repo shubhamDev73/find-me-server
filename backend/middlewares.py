@@ -27,7 +27,7 @@ class AuthTokenMiddleware:
         except:
             request.auth_error = 'invalid authorization'
         data = self.get_response(request)
-        if type(data) is HttpResponse:
+        if isinstance(data, HttpResponse):
             return data
         response = {}
         if type(data) is dict and 'error' in data:
