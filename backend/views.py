@@ -86,9 +86,9 @@ def interests(request):
 
 @auth
 def update_interests(request):
-    interests = [int(interest) for interest in request.GET['interests'].split(',')]
-    amounts = [int(amount) for amount in request.GET.get('amounts', '0').split(',')]
-    remove = request.GET.__contains__('remove')
+    interests = [int(interest) for interest in request.POST['interests'].split(',')]
+    amounts = [int(amount) for amount in request.POST.get('amounts', '0').split(',')]
+    remove = request.POST.__contains__('remove')
     user_interests = UserInterest.objects.filter(user=request.profile.user, interest__in=interests)
     if remove:
         user_interests.delete()
@@ -106,9 +106,9 @@ def update_interests(request):
 
 @auth
 def update_interest(request, pk):
-    question = Question.objects.get(pk=request.GET['question'])
+    question = Question.objects.get(pk=request.POST['question'])
     user_interest = UserInterest.objects.get(user=request.profile.user, interest=pk)
-    text = request.GET['answer']
+    text = request.POST['answer']
     try:
         answer = Answer.objects.get(user_interest=user_interest, question=question)
         answer.text = text
