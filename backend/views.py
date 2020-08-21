@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -14,12 +15,13 @@ def register(request):
     token = None
     error = ''
     if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
         try:
-            User.objects.get(username=request.POST['username'])
+            User.objects.get(username=data['username'])
             error = 'username already exists'
         except User.DoesNotExist:
-            user = User.objects.create(username=request.POST['username'])
-            user.set_password(request.POST['password'])
+            user = User.objects.create(username=data['username'])
+            user.set_password(data['password'])
             user.save()
             token = user.profile.token
     else:
@@ -31,9 +33,10 @@ def login(request):
     token = None
     error = ''
     if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
         try:
-            user = User.objects.get(username=request.POST['username'])
-            if user.check_password(request.POST['password']):
+            user = User.objects.get(username=data['username'])
+            if user.check_password(data['password']):
                 if user.profile.expired:
                     user.profile.new_token()
                 token = user.profile.token
@@ -86,9 +89,10 @@ def interests(request):
 
 @auth
 def update_interests(request):
-    interests = [int(interest) for interest in request.POST['interests'].split(',')]
-    amounts = [int(amount) for amount in request.POST.get('amounts', '0').split(',')]
-    remove = request.POST.__contains__('remove')
+    data = json.loads(request.body.decode("utf-8"))
+    interests = [int(interest) for interest in data['interests'].split(',')]
+    amounts = [int(amount) for amount in data.get('amounts', '0').split(',')]
+    remove = data.__contains__('remove')
     user_interests = UserInterest.objects.filter(user=request.profile.user, interest__in=interests)
     if remove:
         user_interests.delete()
@@ -106,9 +110,10 @@ def update_interests(request):
 
 @auth
 def update_interest(request, pk):
-    question = Question.objects.get(pk=request.POST['question'])
+    data = json.loads(request.body.decode("utf-8"))
+    question = Question.objects.get(pk=data['question'])
     user_interest = UserInterest.objects.get(user=request.profile.user, interest=pk)
-    text = request.POST['answer']
+    text = data['answer']
     try:
         answer = Answer.objects.get(user_interest=user_interest, question=question)
         answer.text = text
