@@ -162,15 +162,18 @@ def avatars(request, pk):
 
 @auth
 def find(request):
-    return [{
-        "id": access.id,
-        "avatar": access.other.avatar.url,
-        "mood": access.other.avatar.mood.name,
-        "personality": {
-            "fire": {"value": 0.678, "positive": True},
-            "water": {"value": 0.678, "positive": False},
-        }, # dummy data
-    } for access in Access.objects.filter(me=request.profile)]
+    return {
+        "users": [{
+            "id": access.id,
+            "avatar": access.other.avatar.url,
+            "mood": access.other.avatar.mood.name,
+            "personality": {
+                "fire": {"value": 0.678, "positive": True},
+                "water": {"value": 0.678, "positive": False},
+            }, # dummy data
+        } for access in Access.objects.filter(me=request.profile)],
+        "views-remaining": MAX_PROFILE_VIEWS - Access.objects.filter(me=request.profile).filter(viewed=True).count(),
+    }
 
 @csrf_exempt
 @auth
