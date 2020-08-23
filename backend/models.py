@@ -29,7 +29,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=64)
     expired = models.BooleanField(default=False)
-    avatar = models.ForeignKey(Avatar, on_delete=models.PROTECT)
+    avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.user.username
