@@ -1,54 +1,47 @@
 import json
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
 
 from .decorators import auth
 from .models import Profile, Interest, UserInterest, Question, Answer, AvatarBase, Mood, Avatar, Access, Connect
 
 
-MAX_PROFILE_VIEWS = 1
+MAX_PROFILE_VIEWS = 5
 
+@require_GET
 def index(request):
     return {"message": "API root node"}
 
 @csrf_exempt
+@require_POST
 def register(request):
     token = None
     error = ''
-    if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        try:
-            User.objects.get(username=data['username'])
-            error = 'username already exists'
-        except User.DoesNotExist:
-            user = User.objects.create(username=data['username'])
-            user.set_password(data['password'])
-            user.save()
-            token = user.profile.token
-    else:
-        error = 'invalid request'
+    data = json.loads(request.body.decode("utf-8"))
+    try:
+        user = User.objects.create_user(data['username'], password=data['password'])
+        token = user.profile.token
+    except:
+        error = 'username already exists'
     return {'token': token, 'error': error}
 
 @csrf_exempt
+@require_POST
 def login(request):
     token = None
     error = ''
-    if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        try:
-            user = User.objects.get(username=data['username'])
-            if user.check_password(data['password']):
-                if user.profile.expired:
-                    user.profile.new_token()
-                token = user.profile.token
-            else:
-                error = 'invalid password'
-        except User.DoesNotExist:
-            error = 'not registered'
+    data = json.loads(request.body.decode("utf-8"))
+    user = authenticate(username=data['username'], password=data['password'])
+    if user is not None:
+        if user.profile.expired:
+            user.profile.new_token()
+        token = user.profile.token
     else:
-        error = 'invalid request'
+        error = 'invalid credentials'
     return {'token': token, 'error': error}
 
 @csrf_exempt
@@ -57,6 +50,7 @@ def logout(request):
     request.profile.expired = True
     request.profile.save()
 
+@require_GET
 @auth
 def me(request):
     return {
@@ -73,6 +67,7 @@ def me(request):
         "mood": request.profile.avatar.mood.name,
     }
 
+@require_GET
 @auth
 def me_interests(request):
     interests = []
@@ -86,6 +81,7 @@ def me_interests(request):
     return interests
 
 @csrf_exempt
+@require_POST
 @auth
 def update_interests(request):
     data = json.loads(request.body.decode("utf-8"))
@@ -108,6 +104,7 @@ def update_interests(request):
                 user_interest.save()
 
 @csrf_exempt
+@require_POST
 @auth
 def update_interest(request, pk):
     data = json.loads(request.body.decode("utf-8"))
@@ -121,6 +118,7 @@ def update_interest(request, pk):
         answer = Answer.objects.create(user_interest=user_interest, question=question, text=text)
     answer.save()
 
+@require_GET
 @auth
 def me_avatar(request):
     return {
@@ -136,6 +134,7 @@ def me_avatar(request):
     }
 
 @csrf_exempt
+@require_POST
 @auth
 def me_avatar_update(request):
     data = json.loads(request.body.decode("utf-8"))
@@ -143,24 +142,29 @@ def me_avatar_update(request):
     request.profile.avatar = avatar
     request.profile.save()
 
+@require_GET
 @auth
 def interests(request):
     return [{"id": interest.id, "name": interest.name} for interest in Interest.objects.all()]
 
+@require_GET
 @auth
 def interest(request, pk):
     interest = Interest.objects.get(pk=pk)
     return {"name": interest.name, "questions": [{"id": question.id, "text": question.text} for question in Question.objects.filter(interest=interest)]}
 
+@require_GET
 @auth
 def base_avatars(request):
     return [{"id": base.id, "name": base.name, "url": base.url} for base in AvatarBase.objects.all()]
 
+@require_GET
 @auth
 def avatars(request, pk):
     base = AvatarBase.objects.get(pk=pk)
     return [{"id": avatar.id, "mood": avatar.mood.name, "url": avatar.url} for avatar in Avatar.objects.filter(base=base)]
 
+@require_GET
 @auth
 def find(request):
     return {
@@ -177,6 +181,7 @@ def find(request):
     }
 
 @csrf_exempt
+@require_POST
 @auth
 def view(request):
     data = json.loads(request.body.decode("utf-8"))
@@ -205,6 +210,7 @@ def view(request):
         return {'error': 'invalid view'}
 
 @csrf_exempt
+@require_POST
 @auth
 def request(request):
     data = json.loads(request.body.decode("utf-8"))
@@ -218,6 +224,7 @@ def request(request):
     else:
         return {'error': 'invalid request'}
 
+@require_GET
 @auth
 def requests(request):
     return [{
@@ -226,6 +233,7 @@ def requests(request):
     } for access in Access.objects.filter(other=request.profile).filter(requested=True).filter(connected=False)]
 
 @csrf_exempt
+@require_POST
 @auth
 def accept(request):
     data = json.loads(request.body.decode("utf-8"))
@@ -241,6 +249,7 @@ def accept(request):
     else:
         return {'error': 'invalid accept'}
 
+@require_GET
 @auth
 def found(request):
     connects = [(connect.user2, connect.id, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user1=request.profile)]
@@ -253,6 +262,7 @@ def found(request):
     } for profile, id, retained in connects]
 
 @csrf_exempt
+@require_POST
 @auth
 def retain(request):
     data = json.loads(request.body.decode("utf-8"))
