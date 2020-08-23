@@ -26,6 +26,13 @@ urlpatterns = [
     path('avatars/', views.base_avatars, name='base_avatars'),
     path('avatars/<int:pk>/', views.avatars, name='avatars'),
 
+
     path('find/', views.find, name='find'),
+    path('find/view/', views.view, name='view'),
+    path('find/request/', views.request, name='request'),
+
+    path('requests/', views.requests, name='requests'),
+    path('requests/accept/', views.accept, name='accept'),
+
     path('found/', views.found, name='found'),
 ]

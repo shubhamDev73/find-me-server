@@ -25,7 +25,11 @@
 			<li>/interests/&lt;interest-id&gt;/ : retrieve all data for this interest id. {"name", "questions": [ {"id", "text"}, {},..]}.</li>
 			<li>/avatars/ : retrieve all avatars. [ {"id", "name", "url"}, {},..].</li>
 			<li>/avatars/&lt;interest-id&gt;/ : retrieve all variants for this avatar id. [{"id", "mood", "url"}, {},..].</li>
-			<li>/find/ : retrieve all users i can find. [ {"id", "avatar", "mood", "personality"}, {},..].</li>
+			<li>/find/ : retrieve all users I can find. [ {"id", "avatar", "mood", "personality"}, {},..].</li>
+			<li>/find/view/ : (POST) view a user. data: id=1. returns same data as /me/. returns error if max views exceeded.</li>
+			<li>/find/request/ : (POST) request a connection from this user. returns error if not viewed or already requested.</li>
+			<li>/requests/ : retrieve all users who have requested for my connection. [ {"id", "avatar"}, {},..].</li>
+			<li>/requests/accept/ : (POST) accept a request. date: id=1. returns an error if request already accepted.</li>
 			<li>/found/ : retrieve all users connected with me. [ {"nick", "avatar", "retained"}, {},..].</li>
 		</ul>
 		<h3>All response are in json format and contain "error" field if an error occured, otherwise contain the data.</h3>

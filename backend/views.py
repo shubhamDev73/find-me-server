@@ -7,6 +7,8 @@ from .decorators import auth
 from .models import Profile, Interest, UserInterest, Question, Answer, AvatarBase, Mood, Avatar, Access, Connect
 
 
+MAX_PROFILE_VIEWS = 1
+
 def index(request):
     return {"message": "API root node"}
 
@@ -169,6 +171,68 @@ def find(request):
             "water": {"value": 0.678, "positive": False},
         }, # dummy data
     } for access in Access.objects.filter(me=request.profile)]
+
+@csrf_exempt
+@auth
+def view(request):
+    data = json.loads(request.body.decode("utf-8"))
+    access = Access.objects.get(pk=data['id'])
+    if access.me == request.profile:
+        if not access.viewed:
+            if MAX_PROFILE_VIEWS and Access.objects.filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
+                return {'error': 'max profile views exceeded'}
+            access.viewed = True
+            access.save()
+        return {
+            "nick": access.other.user.username,
+            "avatar": access.other.avatar.url,
+            "personality": {
+                "fire": {"value": 0.678, "positive": True},
+                "water": {"value": 0.678, "positive": False},
+                "earth": {"value": 0.678, "positive": True},
+                "air": {"value": 0.678, "positive": False},
+                "space": {"value": 0.678, "positive": True},
+            }, # dummy data
+            "interests": [{"name": user_interest.interest.name, "amount": user_interest.amount} for user_interest in UserInterest.objects.filter(user=access.other.user) ],
+            "mood": access.other.avatar.mood.name,
+        }
+    else:
+        return {'error': 'invalid view'}
+
+@csrf_exempt
+@auth
+def request(request):
+    data = json.loads(request.body.decode("utf-8"))
+    access = Access.objects.get(pk=data['id'])
+    if access.me == request.profile and access.viewed:
+        if access.requested:
+            return {'error': 'already requested'}
+        access.requested = True
+        access.save()
+    else:
+        return {'error': 'invalid request'}
+
+@auth
+def requests(request):
+    return [{
+        "id": access.id,
+        "avatar": access.me.avatar.url,
+    } for access in Access.objects.filter(other=request.profile).filter(requested=True).filter(connected=False)]
+
+@csrf_exempt
+@auth
+def accept(request):
+    data = json.loads(request.body.decode("utf-8"))
+    access = Access.objects.get(pk=data['id'])
+    if access.other == request.profile and access.requested:
+        if access.connected:
+            return {'error': 'request already accepted'}
+        access.connected = True
+        access.save()
+        connect = Connect.objects.create(user1=access.me, user2=access.other)
+        connect.save()
+    else:
+        return {'error': 'invalid accept'}
 
 @auth
 def found(request):
