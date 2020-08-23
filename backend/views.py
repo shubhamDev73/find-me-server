@@ -2,6 +2,7 @@ import json
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 
 from .decorators import auth
 from .models import Profile, Interest, UserInterest, Question, Answer, AvatarBase, Mood, Avatar, Access, Connect
@@ -182,9 +183,10 @@ def view(request):
     access = Access.objects.get(pk=data['id'])
     if access.me == request.profile:
         if not access.viewed:
-            if MAX_PROFILE_VIEWS and Access.objects.filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
+            if Access.objects.filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
                 return {'error': 'max profile views exceeded'}
             access.viewed = True
+            access.view_time = timezone.localtime()
             access.save()
         return {
             "nick": access.other.user.username,
@@ -211,6 +213,7 @@ def request(request):
         if access.requested:
             return {'error': 'already requested'}
         access.requested = True
+        access.request_time = timezone.localtime()
         access.save()
     else:
         return {'error': 'invalid request'}
@@ -231,6 +234,7 @@ def accept(request):
         if access.connected:
             return {'error': 'request already accepted'}
         access.connected = True
+        access.connect_time = timezone.localtime()
         access.save()
         connect = Connect.objects.create(user1=access.me, user2=access.other)
         connect.save()
@@ -257,11 +261,17 @@ def retain(request):
         if connect.retained1:
             return {'error': 'user already retained'}
         connect.retained1 = True
+        connect.retain1_time = timezone.localtime()
+        if connect.retained2:
+            connect.retain_time = timezone.localtime()
         connect.save()
     elif connect.user2 == request.profile:
         if connect.retained2:
             return {'error': 'user already retained'}
         connect.retained2 = True
+        connect.retain2_time = timezone.localtime()
+        if connect.retained1:
+            connect.retain_time = timezone.localtime()
         connect.save()
     else:
         return {'error': 'invalid retain'}

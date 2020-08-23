@@ -87,10 +87,15 @@ class Answer(models.Model):
 class Access(models.Model):
     me = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='me')
     other = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='other')
+    create_time = models.DateTimeField(auto_now_add=True)
 
     viewed = models.BooleanField(default=False)
     requested = models.BooleanField(default=False)
     connected = models.BooleanField(default=False)
+
+    view_time = models.DateTimeField(null=True)
+    request_time = models.DateTimeField(null=True)
+    connect_time = models.DateTimeField(null=True)
 
     def __str__(self):
         return str(self.me.user) + " -> " + str(self.other.user)
@@ -98,9 +103,14 @@ class Access(models.Model):
 class Connect(models.Model):
     user1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='first_user')
     user2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='second_user')
+    create_time = models.DateTimeField(auto_now_add=True)
 
     retained1 = models.BooleanField(default=False)
     retained2 = models.BooleanField(default=False)
+
+    retain1_time = models.DateTimeField(null=True)
+    retain2_time = models.DateTimeField(null=True)
+    retain_time = models.DateTimeField(null=True)
 
     def __str__(self):
         return str(self.user1.user) + " - " + str(self.user2.user)
