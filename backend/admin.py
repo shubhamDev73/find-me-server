@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Profile, Interest, UserInterest, Question, Answer, Connect
+from .models import Profile, Interest, UserInterest, Question, Answer, AvatarBase, Mood, Avatar, Access, Connect
 
 
 @admin.register(Profile)
@@ -16,6 +16,10 @@ class ProfileAdmin(admin.ModelAdmin):
     actions = [expire_tokens]
 
 admin.site.register(Interest)
+admin.site.register(AvatarBase)
+admin.site.register(Mood)
+admin.site.register(Avatar)
+admin.site.register(Access)
 
 @admin.register(UserInterest)
 class UserInterestAdmin(admin.ModelAdmin):

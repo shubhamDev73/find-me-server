@@ -4,10 +4,32 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+class AvatarBase(models.Model):
+    name = models.CharField(max_length=20)
+    url = models.URLField()
+
+    def __str__(self):
+        return self.name
+
+class Mood(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+class Avatar(models.Model):
+    base = models.ForeignKey(AvatarBase, on_delete=models.CASCADE)
+    mood = models.ForeignKey(Mood, on_delete=models.CASCADE)
+    url = models.URLField()
+
+    def __str__(self):
+        return str(self.base) + " - " + str(self.mood)
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=64)
     expired = models.BooleanField(default=False)
+    avatar = models.ForeignKey(Avatar, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.user.username
@@ -61,6 +83,17 @@ class Answer(models.Model):
 
     def __str__(self):
         return str(self.user_interest) + " - " + str(self.question) + ": " + self.text
+
+class Access(models.Model):
+    me = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='me')
+    other = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='other')
+
+    viewed = models.BooleanField(default=False)
+    requested = models.BooleanField(default=False)
+    connected = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.me.user) + " -> " + str(self.other.user)
 
 class Connect(models.Model):
     user1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='first_user')

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .decorators import auth
-from .models import Profile, Interest, UserInterest, Question, Answer, Connect
+from .models import Profile, Interest, UserInterest, Question, Answer, AvatarBase, Mood, Avatar, Access, Connect
 
 
 def index(request):
@@ -58,18 +58,17 @@ def logout(request):
 def me(request):
     return {
         "nick": request.profile.user.username,
-        "avatar": "https://media.vanityfair.com/photos/5ba12e6b6603312e2a5bbee8/master/w_768,c_limit/Avatar-The-Last-Airbender-Live-Action.jpg",
-        "avatar-base": "https://media.vanityfair.com/photos/5ba12e6b6603312e2a5bbee8/master/w_768,c_limit/Avatar-The-Last-Airbender-Live-Action.jpg",
+        "avatar": request.profile.avatar.url,
         "personality": {
             "fire": {"value": 0.678, "positive": True},
             "water": {"value": 0.678, "positive": False},
             "earth": {"value": 0.678, "positive": True},
             "air": {"value": 0.678, "positive": False},
             "space": {"value": 0.678, "positive": True},
-        },
+        }, # dummy data
         "interests": [{"name": user_interest.interest.name, "amount": user_interest.amount} for user_interest in UserInterest.objects.filter(user=request.profile.user) ],
-        "mood": "cheerful",
-    } # dummy data
+        "mood": request.profile.avatar.mood.name,
+    }
 
 @auth
 def me_interests(request):
@@ -83,10 +82,7 @@ def me_interests(request):
         })
     return interests
 
-@auth
-def interests(request):
-    return [{"id": interest.id, "name": interest.name} for interest in Interest.objects.all()]
-
+@csrf_exempt
 @auth
 def update_interests(request):
     data = json.loads(request.body.decode("utf-8"))
@@ -108,6 +104,7 @@ def update_interests(request):
                 user_interest = UserInterest.objects.create(user=request.profile.user, interest=interest, amount=amount)
                 user_interest.save()
 
+@csrf_exempt
 @auth
 def update_interest(request, pk):
     data = json.loads(request.body.decode("utf-8"))
@@ -122,9 +119,56 @@ def update_interest(request, pk):
     answer.save()
 
 @auth
+def me_avatar(request):
+    return {
+        "url": request.profile.avatar.url,
+        "name": request.profile.avatar.base.name,
+        "mood": request.profile.avatar.mood.name,
+        "base": request.profile.avatar.base.url,
+        "variants": [{
+            "id": avatar.id,
+            "mood": avatar.mood.name,
+            "url": avatar.url,
+        } for avatar in Avatar.objects.filter(base=request.profile.avatar.base)],
+    }
+
+@csrf_exempt
+@auth
+def me_avatar_update(request):
+    data = json.loads(request.body.decode("utf-8"))
+    avatar = Avatar.objects.get(pk=data['id'])
+    request.profile.avatar = avatar
+    request.profile.save()
+
+@auth
+def interests(request):
+    return [{"id": interest.id, "name": interest.name} for interest in Interest.objects.all()]
+
+@auth
 def interest(request, pk):
     interest = Interest.objects.get(pk=pk)
     return {"name": interest.name, "questions": [{"id": question.id, "text": question.text} for question in Question.objects.filter(interest=interest)]}
+
+@auth
+def base_avatars(request):
+    return [{"id": base.id, "name": base.name, "url": base.url} for base in AvatarBase.objects.all()]
+
+@auth
+def avatars(request, pk):
+    base = AvatarBase.objects.get(pk=pk)
+    return [{"id": avatar.id, "mood": avatar.mood.name, "url": avatar.url} for avatar in Avatar.objects.filter(base=base)]
+
+@auth
+def find(request):
+    return [{
+        "id": access.id,
+        "avatar": access.other.avatar.url,
+        "mood": access.other.avatar.mood.name,
+        "personality": {
+            "fire": {"value": 0.678, "positive": True},
+            "water": {"value": 0.678, "positive": False},
+        }, # dummy data
+    } for access in Access.objects.filter(me=request.profile)]
 
 @auth
 def found(request):
@@ -132,6 +176,6 @@ def found(request):
     connects += [(connect.user1, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user2=request.profile)]
     return [{
         "nick": profile.user.username,
-        "avatar": "https://media.vanityfair.com/photos/5ba12e6b6603312e2a5bbee8/master/w_768,c_limit/Avatar-The-Last-Airbender-Live-Action.jpg",
+        "avatar": profile.avatar.url,
         "retained": retained
     } for profile, retained in connects]

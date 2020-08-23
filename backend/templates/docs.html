@@ -17,10 +17,15 @@
 			<li>/logout/ : to logout.</li>
 			<li>/me/ : retrieve information about me. {"nick", "avatar" (with mood), "avatar-base" (without mood), "personality", "interests", "mood"}.</li>
 			<li>/me/interests/ : retrieve information about my interests. [ {"name", "amount", "answers": [ {"question", "answer"} ] } ].</li>
-			<li>/me/update/interests/ : update my interests. data: interests=1,3,4&amounts=1,3,2 or interests=1,2&remove</li>
-			<li>/me/update/interests/&lt;interest-id&gt; : update answers about my interest. data: question=&lt;question-id&gt;&answer=answer%20text</li>
+			<li>/me/interests/update/ : update my interests. data: interests=1,3,4&amounts=1,3,2 or interests=1,2&remove</li>
+			<li>/me/interests/&lt;interest-id&gt;/update/ : update answers about my interest. data: question=&lt;question-id&gt;&answer=answer%20text</li>
+			<li>/me/avatar/ : retrieve information about my avatar. {"url", "name", "mood", "base", "variants": [{"id", "mood", "url"}, {},..] }.</li>
+			<li>/me/avatar/update/ : update my avatar. data: id=1</li>
 			<li>/interests/ : retrieve all interests. [ {"id", "name"}, {},..].</li>
-			<li>/interests/&lt;interest-id&gt; : retrieve all data for this interest id. {"name", "questions": [ {"id", "text"}, {},..]}.</li>
+			<li>/interests/&lt;interest-id&gt;/ : retrieve all data for this interest id. {"name", "questions": [ {"id", "text"}, {},..]}.</li>
+			<li>/avatars/ : retrieve all avatars. [ {"id", "name", "url"}, {},..].</li>
+			<li>/avatars/&lt;interest-id&gt;/ : retrieve all variants for this avatar id. [{"id", "mood", "url"}, {},..].</li>
+			<li>/find/ : retrieve all users i can find. [ {"id", "avatar", "mood", "personality"}, {},..].</li>
 			<li>/found/ : retrieve all users connected with me. [ {"nick", "avatar", "retained"}, {},..].</li>
 		</ul>
 		<h3>All response are in json format and contain "error" field if an error occured, otherwise contain the data.</h3>
