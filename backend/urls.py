@@ -35,4 +35,5 @@ urlpatterns = [
     path('requests/accept/', views.accept, name='accept'),
 
     path('found/', views.found, name='found'),
+    path('found/retain/', views.retain, name='retain'),
 ]

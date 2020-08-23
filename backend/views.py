@@ -236,10 +236,29 @@ def accept(request):
 
 @auth
 def found(request):
-    connects = [(connect.user2, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user1=request.profile)]
-    connects += [(connect.user1, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user2=request.profile)]
+    connects = [(connect.user2, connect.id, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user1=request.profile)]
+    connects += [(connect.user1, connect.id, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user2=request.profile)]
     return [{
+        "id": id,
         "nick": profile.user.username,
         "avatar": profile.avatar.url,
         "retained": retained
-    } for profile, retained in connects]
+    } for profile, id, retained in connects]
+
+@csrf_exempt
+@auth
+def retain(request):
+    data = json.loads(request.body.decode("utf-8"))
+    connect = Connect.objects.get(pk=data['id'])
+    if connect.user1 == request.profile:
+        if connect.retained1:
+            return {'error': 'user already retained'}
+        connect.retained1 = True
+        connect.save()
+    elif connect.user2 == request.profile:
+        if connect.retained2:
+            return {'error': 'user already retained'}
+        connect.retained2 = True
+        connect.save()
+    else:
+        return {'error': 'invalid retain'}

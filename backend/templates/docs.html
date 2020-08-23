@@ -30,7 +30,8 @@
 			<li>/find/request/ : (POST) request a connection from this user. returns error if not viewed or already requested.</li>
 			<li>/requests/ : retrieve all users who have requested for my connection. [ {"id", "avatar"}, {},..].</li>
 			<li>/requests/accept/ : (POST) accept a request. date: id=1. returns an error if request already accepted.</li>
-			<li>/found/ : retrieve all users connected with me. [ {"nick", "avatar", "retained"}, {},..].</li>
+			<li>/found/ : retrieve all users connected with me. [ {"id", "nick", "avatar", "retained"}, {},..].</li>
+			<li>/found/retain/ : (POST) retain a connected user. data: id=1.</li>
 		</ul>
 		<h3>All response are in json format and contain "error" field if an error occured, otherwise contain the data.</h3>
 		<h3>Auth token may expire due to security reasons. If this happens, ask user to login again.</h3>
