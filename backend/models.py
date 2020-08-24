@@ -23,7 +23,7 @@ class Avatar(models.Model):
     url = models.URLField()
 
     def __str__(self):
-        return str(self.base) + " - " + str(self.mood)
+        return f"{str(self.base)} ({str(self.mood)})"
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -32,7 +32,7 @@ class Profile(models.Model):
     avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
 
     def __str__(self):
-        return self.user.username
+        return str(self.user)
 
     def new_token(self):
         import secrets
@@ -67,7 +67,7 @@ class UserInterest(models.Model):
     amount = models.IntegerField(default=0)
 
     def __str__(self):
-        return str(self.user) + " - " + str(self.interest) + ": " + str(self.amount)
+        return f"{str(self.user)} - {str(self.interest)} : {self.amount}"
 
 class Question(models.Model):
     interest = models.ForeignKey(Interest, on_delete=models.CASCADE)
@@ -82,9 +82,13 @@ class Answer(models.Model):
     text = models.TextField()
 
     def __str__(self):
-        return str(self.user_interest) + " - " + str(self.question) + ": " + self.text
+        return f"{str(self.user_interest)} - {str(self.question)} : {self.text}"
 
 class Access(models.Model):
+
+    class Meta:
+        verbose_name_plural = "accesses"
+
     me = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='me')
     other = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='other')
     create_time = models.DateTimeField(auto_now_add=True)
@@ -114,3 +118,7 @@ class Connect(models.Model):
 
     def __str__(self):
         return str(self.user1.user) + " - " + str(self.user2.user)
+
+    def retained(self):
+        return self.retained1 and self.retained2
+    retained.boolean = True

@@ -252,8 +252,8 @@ def accept(request):
 @require_GET
 @auth
 def found(request):
-    connects = [(connect.user2, connect.id, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user1=request.profile)]
-    connects += [(connect.user1, connect.id, connect.retained1 and connect.retained2) for connect in Connect.objects.filter(user2=request.profile)]
+    connects = [(connect.user2, connect.id, connect.retained()) for connect in Connect.objects.filter(user1=request.profile)]
+    connects += [(connect.user1, connect.id, connect.retained()) for connect in Connect.objects.filter(user2=request.profile)]
     return [{
         "id": id,
         "nick": profile.user.username,
