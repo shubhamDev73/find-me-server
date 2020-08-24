@@ -85,23 +85,20 @@ def me_interests(request):
 @auth
 def update_interests(request):
     data = json.loads(request.body.decode("utf-8"))
-    interests = [int(interest) for interest in data['interests'].split(',')]
-    amounts = [int(amount) for amount in data.get('amounts', '0').split(',')]
-    remove = data.__contains__('remove')
-    user_interests = UserInterest.objects.filter(user=request.profile.user, interest__in=interests)
-    if remove:
-        user_interests.delete()
-    else:
-        for user_interest in user_interests:
-            index = interests.index(user_interest.interest.pk)
-            user_interest.amount = amounts[index]
+    user_interests = UserInterest.objects.filter(user=request.profile.user, interest__in=data['interests'])
+    for user_interest in user_interests:
+        index = data['interests'].index(user_interest.interest.pk)
+        if amount := data['amounts'][index]:
+            user_interest.amount = data['amounts'][index]
             user_interest.save()
-            amounts[index] = 0
-        for index, amount in enumerate(amounts):
-            if amount != 0:
-                interest = Interest.objects.get(pk=interests[index])
-                user_interest = UserInterest.objects.create(user=request.profile.user, interest=interest, amount=amount)
-                user_interest.save()
+            data['amounts'][index] = 0
+        else:
+            user_interest.delete()
+    for index, amount in enumerate(data['amounts']):
+        if amount != 0:
+            interest = Interest.objects.get(pk=data['interests'][index])
+            user_interest = UserInterest.objects.create(user=request.profile.user, interest=interest, amount=amount)
+            user_interest.save()
 
 @csrf_exempt
 @require_POST
