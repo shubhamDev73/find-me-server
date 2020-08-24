@@ -2,7 +2,6 @@ import json
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
 
@@ -16,7 +15,6 @@ MAX_PROFILE_VIEWS = 5
 def index(request):
     return {"message": "API root node"}
 
-@csrf_exempt
 @require_POST
 def register(request):
     token = None
@@ -29,7 +27,6 @@ def register(request):
         error = 'username already exists'
     return {'token': token, 'error': error}
 
-@csrf_exempt
 @require_POST
 def login(request):
     token = None
@@ -44,7 +41,6 @@ def login(request):
         error = 'invalid credentials'
     return {'token': token, 'error': error}
 
-@csrf_exempt
 @auth
 def logout(request):
     request.profile.expired = True
@@ -80,7 +76,6 @@ def me_interests(request):
         })
     return interests
 
-@csrf_exempt
 @require_POST
 @auth
 def update_interests(request):
@@ -100,7 +95,6 @@ def update_interests(request):
             user_interest = UserInterest.objects.create(user=request.profile.user, interest=interest, amount=amount)
             user_interest.save()
 
-@csrf_exempt
 @require_POST
 @auth
 def update_interest(request, pk):
@@ -130,7 +124,6 @@ def me_avatar(request):
         } for avatar in Avatar.objects.filter(base=request.profile.avatar.base)],
     }
 
-@csrf_exempt
 @require_POST
 @auth
 def me_avatar_update(request):
@@ -177,7 +170,6 @@ def find(request):
         "views-remaining": MAX_PROFILE_VIEWS - Access.objects.filter(me=request.profile).filter(viewed=True).count(),
     }
 
-@csrf_exempt
 @require_POST
 @auth
 def view(request):
@@ -206,7 +198,6 @@ def view(request):
     else:
         return {'error': 'invalid view'}
 
-@csrf_exempt
 @require_POST
 @auth
 def request(request):
@@ -229,7 +220,6 @@ def requests(request):
         "avatar": access.me.avatar.url,
     } for access in Access.objects.filter(other=request.profile).filter(requested=True).filter(connected=False)]
 
-@csrf_exempt
 @require_POST
 @auth
 def accept(request):
@@ -258,7 +248,6 @@ def found(request):
         "retained": retained
     } for profile, id, retained in connects]
 
-@csrf_exempt
 @require_POST
 @auth
 def retain(request):
