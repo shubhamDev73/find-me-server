@@ -16,11 +16,12 @@
 		<ul>
 			<h3>User end-points. Require "Authorization: Bearer &lt;auth-token&gt;" as header. Retrieve are GET requests, update are POST requests.</h3>
 			<li>/me/ : retrieve information about me. {"nick", "avatar" (with mood), "avatar-base" (without mood), "personality", "interests", "mood"}.</li>
-			<li>/me/interests/ : retrieve information about my interests. [ {"name", "amount", "answers": [ {"question", "answer"} ] } ].</li>
-			<li>/me/interests/update/ : update my interests. data: {"interests": [1, 2, 3], "amounts": [0, 2, 1]}. setting amount to zero will remove that interest.</li>
-			<li>/me/interests/&lt;interest-id&gt;/update/ : update answers about my interest. data: {"question": &lt;question-id&gt;, "answer": "answer%20text"}.</li>
+			<li>/me/interests/ : retrieve information about my interests. [ {"id", "name", "amount", "answers": [ {"question", "answer"} ] } ].</li>
+			<li>/me/interests/update/ : (POST) update my interests. data: {"interests": [1, 2, 3], "amounts": [0, 2, 1]}. setting amount to zero will remove that interest.</li>
+			<li>/me/interests/&lt;interest-id&gt;/ : retrieve answers about my specific interest.</li>
+			<li>/me/interests/&lt;interest-id&gt;/update/ : (POST) update answers about my interest. data: {"question": &lt;question-id&gt;, "answer": "answer%20text"}.</li>
 			<li>/me/avatar/ : retrieve information about my avatar. {"url", "name", "mood", "base", "variants": [{"id", "mood", "url"}, {},..] }.</li>
-			<li>/me/avatar/update/ : update my avatar. data: {"id": 1}.</li>
+			<li>/me/avatar/update/ : (POST) update my avatar. data: {"id": 1}.</li>
 			<li>/interests/ : retrieve all interests. [ {"id", "name"}, {},..].</li>
 			<li>/interests/&lt;interest-id&gt;/ : retrieve all data for this interest id. {"name", "questions": [ {"id", "text"}, {},..]}.</li>
 			<li>/avatars/ : retrieve all avatars. [ {"id", "name", "url"}, {},..].</li>

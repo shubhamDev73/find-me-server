@@ -75,15 +75,22 @@ def me(request):
 @require_GET
 @auth
 def me_interests(request):
-    interests = []
-    user_interests = UserInterest.objects.filter(user=request.profile.user)
-    for user_interest in user_interests:
-        interests.append({
-            "name": user_interest.interest.name,
-            "amount": user_interest.amount,
-            "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
-        })
-    return interests
+    return [{
+        "id": user_interest.interest.id,
+        "name": user_interest.interest.name,
+        "amount": user_interest.amount,
+        "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
+    } for user_interest in UserInterest.objects.filter(user=request.profile.user)]
+
+@require_GET
+@auth
+def me_interest(request, pk):
+    user_interest = UserInterest.objects.get(user=request.profile.user, interest=pk)
+    return {
+        "name": user_interest.interest.name,
+        "amount": user_interest.amount,
+        "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
+    }
 
 @require_POST
 @auth
