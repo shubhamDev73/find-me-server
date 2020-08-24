@@ -1,4 +1,3 @@
-import json
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
@@ -21,11 +20,10 @@ def index(request):
 def register(request):
     token = None
     error = ''
-    data = json.loads(request.body.decode("utf-8"))
     try:
-        user = User.objects.create_user(data['username'], password=data['password'])
+        user = User.objects.create_user(request.data['username'], password=request.data['password'])
         try:
-            validate_password(data['password'], user)
+            validate_password(request.data['password'], user)
             token = user.profile.token
         except ValidationError as e:
             error = list(e)
@@ -38,8 +36,7 @@ def register(request):
 def login(request):
     token = None
     error = ''
-    data = json.loads(request.body.decode("utf-8"))
-    user = authenticate(username=data['username'], password=data['password'])
+    user = authenticate(username=request.data['username'], password=request.data['password'])
     if user is not None:
         auth_login(request, user)
         if user.profile.expired:
@@ -96,8 +93,7 @@ def personality_update(request):
             "questions": ["How extrovert are you?", "How depressed are you?"], # dummy data
         }
     else:
-        data = json.loads(request.body.decode("utf-8"))
-        questionnaire = PersonalityQuestionnaire.objects.get(pk=data['id'])
+        questionnaire = PersonalityQuestionnaire.objects.get(pk=request.data['id'])
         if questionnaire.user != request.profile.user:
             return {'error': 'invalid questionnaire'}
         if questionnaire.submitted:
@@ -130,29 +126,27 @@ def me_interest(request, pk):
 @require_POST
 @auth
 def update_interests(request):
-    data = json.loads(request.body.decode("utf-8"))
-    user_interests = UserInterest.objects.filter(user=request.profile.user, interest__in=data['interests'])
+    user_interests = UserInterest.objects.filter(user=request.profile.user, interest__in=request.data['interests'])
     for user_interest in user_interests:
-        index = data['interests'].index(user_interest.interest.pk)
-        if amount := data['amounts'][index]:
-            user_interest.amount = data['amounts'][index]
+        index = request.data['interests'].index(user_interest.interest.pk)
+        if amount := request.data['amounts'][index]:
+            user_interest.amount = request.data['amounts'][index]
             user_interest.save()
-            data['amounts'][index] = 0
+            request.data['amounts'][index] = 0
         else:
             user_interest.delete()
-    for index, amount in enumerate(data['amounts']):
+    for index, amount in enumerate(request.data['amounts']):
         if amount != 0:
-            interest = Interest.objects.get(pk=data['interests'][index])
+            interest = Interest.objects.get(pk=request.data['interests'][index])
             user_interest = UserInterest.objects.create(user=request.profile.user, interest=interest, amount=amount)
             user_interest.save()
 
 @require_POST
 @auth
 def update_interest(request, pk):
-    data = json.loads(request.body.decode("utf-8"))
-    question = Question.objects.get(pk=data['question'])
+    question = Question.objects.get(pk=request.data['question'])
     user_interest = UserInterest.objects.get(user=request.profile.user, interest=pk)
-    text = data['answer']
+    text = request.data['answer']
     try:
         answer = Answer.objects.get(user_interest=user_interest, question=question)
         answer.text = text
@@ -178,8 +172,7 @@ def me_avatar(request):
 @require_POST
 @auth
 def me_avatar_update(request):
-    data = json.loads(request.body.decode("utf-8"))
-    avatar = Avatar.objects.get(pk=data['id'])
+    avatar = Avatar.objects.get(pk=request.data['id'])
     request.profile.avatar = avatar
     request.profile.save()
 
@@ -224,8 +217,7 @@ def find(request):
 @require_POST
 @auth
 def view(request):
-    data = json.loads(request.body.decode("utf-8"))
-    access = Access.objects.get(pk=data['id'])
+    access = Access.objects.get(pk=request.data['id'])
     if access.me == request.profile:
         if not access.viewed:
             if Access.objects.filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
@@ -252,8 +244,7 @@ def view(request):
 @require_POST
 @auth
 def request(request):
-    data = json.loads(request.body.decode("utf-8"))
-    access = Access.objects.get(pk=data['id'])
+    access = Access.objects.get(pk=request.data['id'])
     if access.me == request.profile and access.viewed:
         if access.requested:
             return {'error': 'already requested'}
@@ -274,8 +265,7 @@ def requests(request):
 @require_POST
 @auth
 def accept(request):
-    data = json.loads(request.body.decode("utf-8"))
-    access = Access.objects.get(pk=data['id'])
+    access = Access.objects.get(pk=request.data['id'])
     if access.other == request.profile and access.requested:
         if access.connected:
             return {'error': 'request already accepted'}
@@ -302,8 +292,7 @@ def found(request):
 @require_POST
 @auth
 def retain(request):
-    data = json.loads(request.body.decode("utf-8"))
-    connect = Connect.objects.get(pk=data['id'])
+    connect = Connect.objects.get(pk=request.data['id'])
     if connect.user1 == request.profile:
         if connect.retained1:
             return {'error': 'user already retained'}
