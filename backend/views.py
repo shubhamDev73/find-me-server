@@ -1,6 +1,8 @@
 import json
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
@@ -22,7 +24,12 @@ def register(request):
     data = json.loads(request.body.decode("utf-8"))
     try:
         user = User.objects.create_user(data['username'], password=data['password'])
-        token = user.profile.token
+        try:
+            validate_password(data['password'], user)
+            token = user.profile.token
+        except ValidationError as e:
+            error = list(e)
+            user.delete()
     except:
         error = 'username already exists'
     return {'token': token, 'error': error}
@@ -34,6 +41,7 @@ def login(request):
     data = json.loads(request.body.decode("utf-8"))
     user = authenticate(username=data['username'], password=data['password'])
     if user is not None:
+        auth_login(request, user)
         if user.profile.expired:
             user.profile.new_token()
         token = user.profile.token
@@ -41,6 +49,7 @@ def login(request):
         error = 'invalid credentials'
     return {'token': token, 'error': error}
 
+@require_POST
 @auth
 def logout(request):
     request.profile.expired = True
