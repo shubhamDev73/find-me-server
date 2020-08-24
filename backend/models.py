@@ -55,6 +55,15 @@ def create_user_profile(sender, instance, created, **kwargs):
         profile = Profile.objects.create(user=instance)
         profile.new_token()
 
+class PersonalityQuestionnaire(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    submitted = models.BooleanField(default=False)
+    create_time = models.DateTimeField(auto_now_add=True)
+    submit_time = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return str(self.user)
+
 class Interest(models.Model):
     name = models.CharField(max_length=20)
 

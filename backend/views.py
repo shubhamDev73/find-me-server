@@ -4,11 +4,11 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from django.utils import timezone
 
 from .decorators import auth
-from .models import Profile, Interest, UserInterest, Question, Answer, AvatarBase, Mood, Avatar, Access, Connect
+from .models import *
 
 
 MAX_PROFILE_VIEWS = 5
@@ -71,6 +71,41 @@ def me(request):
         "interests": [{"name": user_interest.interest.name, "amount": user_interest.amount} for user_interest in UserInterest.objects.filter(user=request.profile.user) ],
         "mood": request.profile.avatar.mood.name,
     }
+
+@require_GET
+@auth
+def personality(request):
+    return {
+        "fire": {"value": 0.678, "positive": True},
+        "water": {"value": 0.678, "positive": False},
+        "earth": {"value": 0.678, "positive": True},
+        "air": {"value": 0.678, "positive": False},
+        "space": {"value": 0.678, "positive": True},
+    } # dummy data
+
+@require_http_methods(["GET", "POST"])
+@auth
+def personality_update(request):
+    if request.method == "GET":
+        try:
+            questionnaire = PersonalityQuestionnaire.objects.get(user=request.profile.user, submitted=False)
+        except PersonalityQuestionnaire.DoesNotExist:
+            questionnaire = PersonalityQuestionnaire.objects.create(user=request.profile.user)
+        return {
+            "id": questionnaire.id,
+            "questions": ["How extrovert are you?", "How depressed are you?"], # dummy data
+        }
+    else:
+        data = json.loads(request.body.decode("utf-8"))
+        questionnaire = PersonalityQuestionnaire.objects.get(pk=data['id'])
+        if questionnaire.user != request.profile.user:
+            return {'error': 'invalid questionnaire'}
+        if questionnaire.submitted:
+            return {'error': 'questionnaire already answered'}
+        questionnaire.submitted = True
+        questionnaire.submit_time = timezone.localtime()
+        questionnaire.save()
+        # update user personality based on answers
 
 @require_GET
 @auth

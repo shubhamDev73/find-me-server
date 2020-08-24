@@ -12,6 +12,9 @@ urlpatterns = [
 
     path('me/', views.me, name='me'),
 
+	path('me/personality/', views.personality, name='personality'),
+    path('me/personality/update/', views.personality_update, name='personality_update'),
+
     path('me/interests/', views.me_interests, name='me_interests'),
     path('me/interests/update/', views.update_interests, name='update_interests'),
     path('me/interests/<int:pk>/', views.me_interest, name='me_interest'),

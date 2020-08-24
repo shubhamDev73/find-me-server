@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Profile, Interest, UserInterest, Question, Answer, AvatarBase, Mood, Avatar, Access, Connect
+from .models import *
 
 
 admin.site.site_title = "Find Me"
@@ -39,6 +39,17 @@ class ProfileAdmin(admin.ModelAdmin):
     expire_tokens.short_description = 'Expire auth tokens'
 
     actions = [expire_tokens]
+
+@admin.register(PersonalityQuestionnaire)
+class PersonalityQuestionnaireAdmin(admin.ModelAdmin):
+
+    fields = ['user']
+    list_display = ['user', 'create_time', 'submitted', 'submit_time']
+    list_filter = ['submitted', 'user']
+    search_fields = ['user__username']
+    date_hierarchy = 'create_time'
+    show_full_result_count = True
+    empty_value_display = '<em>-NA-</em>'
 
 @admin.register(Interest)
 class InterestAdmin(admin.ModelAdmin):
