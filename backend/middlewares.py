@@ -8,7 +8,10 @@ class PostJsonMiddleware:
         import json
 
         if request.method == "POST":
-            request.data = json.loads(request.body.decode("utf-8"))
+            if string := request.body.decode("utf-8"):
+                request.data = json.loads(string)
+            else:
+                request.data = {}
 
         return self.get_response(request)
 
@@ -23,6 +26,7 @@ class AuthTokenMiddleware:
         from .models import Profile
 
         request.profile = None
+        code = 200
         try:
             splits = request.META['HTTP_AUTHORIZATION'].split("Bearer ")
             if len(splits) == 2 and splits[0] == "":
@@ -30,15 +34,19 @@ class AuthTokenMiddleware:
                 try:
                     profile = Profile.objects.get(token=token)
                     if profile.expired:
-                        request.auth_error = 'token expired'
+                        request.auth_error = 'Auth token expired.'
+                        code = 401
                     else:
                         request.profile = profile
                 except Profile.DoesNotExist:
-                    request.auth_error = 'invalid token'
+                    request.auth_error = 'Invalid auth token.'
+                    code = 403
             else:
-                request.auth_error = 'invalid header'
+                request.auth_error = 'Invalid auth header.'
+                code = 400
         except:
-            request.auth_error = 'invalid authorization'
+            request.auth_error = 'Missing authorization.'
+            code = 403
 
         data = self.get_response(request)
         if isinstance(data, HttpResponse):
@@ -46,10 +54,11 @@ class AuthTokenMiddleware:
 
         response = {}
         if type(data) is dict and 'error' in data:
-            response['error'] = data['error']
-            data.pop('error')
+            response['error'] = data.pop('error')
+            if 'code' in data:
+                code = data.pop('code')
 
         if 'error' not in response or response['error'] == '':
             response = data
 
-        return JsonResponse(response, safe=False)
+        return JsonResponse(response, safe=False, status=code)
