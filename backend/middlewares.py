@@ -9,7 +9,10 @@ class PostJsonMiddleware:
 
         if request.method == "POST":
             if string := request.body.decode("utf-8"):
-                request.data = json.loads(string)
+                try:
+                    request.data = json.loads(string)
+                except:
+                    pass
             else:
                 request.data = {}
 
