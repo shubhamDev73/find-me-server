@@ -62,18 +62,22 @@ class Profile(models.Model):
         return np.array(facets, np.float)
 
     def get_personality(self):
-        return self.facets.reshape((NUM_TRAITS, FACETS_PER_TRAIT)).sum(axis=1) / FACETS_PER_TRAIT
+        personality = self.facets.reshape((NUM_TRAITS, FACETS_PER_TRAIT)).sum(axis=1) / FACETS_PER_TRAIT
+        return (personality - 0.5) * 2
+
+    @staticmethod
+    def construct_personality(personality, indices):
+        return {Personality(index).name: personality[index] for index in indices}
 
     @property
     def personality(self):
-        personality = self.get_personality()
-        return {Personality(i).name: personality[i] for i in range(NUM_TRAITS)}
+        return Profile.construct_personality(self.get_personality(), range(NUM_TRAITS))
 
     @property
     def major_personality(self):
         personality = self.get_personality()
-        indices = personality.argsort()[NUM_TRAITS - NUM_DOMINANT_TRAITS:]
-        return {Personality(index).name: personality[index] for index in indices}
+        indices = abs(personality).argsort()[NUM_TRAITS - NUM_DOMINANT_TRAITS:]
+        return Profile.construct_personality(personality, indices)
 
     def save_facets(self, facets):
         self._personality = ''.join((f"%0.{FLOAT_PRECISION}f" % facets[i])[2:] for i in range(NUM_FACETS))
