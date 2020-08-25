@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from algo.parameters import *
+
+FLOAT_PRECISION = 4
+
 
 class AvatarBase(models.Model):
     name = models.CharField(max_length=20)
@@ -30,7 +34,7 @@ class Profile(models.Model):
     token = models.CharField(max_length=64)
     expired = models.BooleanField(default=False)
     avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
-    personality = models.CharField(max_length=120, default='0'*120)
+    _personality = models.CharField(max_length=120, default='0' * NUM_FACETS * FLOAT_PRECISION)
 
     def __str__(self):
         return str(self.user)
@@ -50,19 +54,29 @@ class Profile(models.Model):
         self.save()
         return self
 
-    def get_facets(self):
-        values = self.personality
-        facets = [0 for _ in range(30)]
-        for i in range(30):
-            facets[i] = float(f"0.{values[i * 4 : (i + 1) * 4]}")
-        return facets
+    @property
+    def facets(self):
+        import numpy as np
+
+        facets = [float(f"0.{self._personality[i * FLOAT_PRECISION : (i + 1) * FLOAT_PRECISION]}") for i in range(NUM_FACETS)]
+        return np.array(facets, np.float)
 
     def get_personality(self):
-        facets = self.get_facets()
-        return [sum(facets[i * 6 : (i + 1) * 6]) / 6 for i in range(5)]
+        return self.facets.reshape((NUM_TRAITS, FACETS_PER_TRAIT)).sum(axis=1) / FACETS_PER_TRAIT
+
+    @property
+    def personality(self):
+        personality = self.get_personality()
+        return {Personality(i).name: personality[i] for i in range(NUM_TRAITS)}
+
+    @property
+    def major_personality(self):
+        personality = self.get_personality()
+        indices = personality.argsort()[NUM_TRAITS - NUM_DOMINANT_TRAITS:]
+        return {Personality(index).name: personality[index] for index in indices}
 
     def save_facets(self, facets):
-        self.personality = ''.join(("%0.4f" % facets[i])[2:] for i in range(30))
+        self._personality = ''.join((f"%0.{FLOAT_PRECISION}f" % facets[i])[2:] for i in range(NUM_FACETS))
         self.save()
         return self
 

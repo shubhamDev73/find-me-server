@@ -30,7 +30,7 @@ class ProfileAdmin(admin.ModelAdmin):
         return str(obj.avatar.base)
 
     fields = ['user', 'avatar', 'expired']
-    list_display = ['user', 'base_avatar', 'mood', 'expired']
+    list_display = ['user', 'personality', 'base_avatar', 'mood', 'expired']
     list_filter = [AvatarBaseListFilter, 'avatar__mood', 'expired']
     search_fields = ['user__username', 'avatar__base__name', 'avatar__mood__name']
 

@@ -57,13 +57,7 @@ def me(request):
     return {
         "nick": request.profile.user.username,
         "avatar": request.profile.avatar.url,
-        "personality": {
-            "fire": {"value": 0.678, "positive": True},
-            "water": {"value": 0.678, "positive": False},
-            "earth": {"value": 0.678, "positive": True},
-            "air": {"value": 0.678, "positive": False},
-            "space": {"value": 0.678, "positive": True},
-        }, # dummy data
+        "personality": request.profile.personality,
         "interests": [{"name": user_interest.interest.name, "amount": user_interest.amount} for user_interest in UserInterest.objects.filter(user=request.profile.user) ],
         "mood": request.profile.avatar.mood.name,
     }
@@ -71,13 +65,7 @@ def me(request):
 @require_GET
 @auth
 def personality(request):
-    return {
-        "fire": {"value": 0.678, "positive": True},
-        "water": {"value": 0.678, "positive": False},
-        "earth": {"value": 0.678, "positive": True},
-        "air": {"value": 0.678, "positive": False},
-        "space": {"value": 0.678, "positive": True},
-    } # dummy data
+    return request.profile.personality
 
 @require_http_methods(["GET", "POST"])
 @auth
@@ -228,10 +216,7 @@ def find(request):
             "id": access.id,
             "avatar": access.other.avatar.url,
             "mood": access.other.avatar.mood.name,
-            "personality": {
-                "fire": {"value": 0.678, "positive": True},
-                "water": {"value": 0.678, "positive": False},
-            }, # dummy data
+            "personality": access.other.major_personality,
         } for access in Access.objects.filter(active=True).filter(me=request.profile)],
         "views-remaining": MAX_PROFILE_VIEWS - Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count(),
     }
@@ -251,13 +236,7 @@ def view(request):
             return {
                 "nick": access.other.user.username,
                 "avatar": access.other.avatar.url,
-                "personality": {
-                    "fire": {"value": 0.678, "positive": True},
-                    "water": {"value": 0.678, "positive": False},
-                    "earth": {"value": 0.678, "positive": True},
-                    "air": {"value": 0.678, "positive": False},
-                    "space": {"value": 0.678, "positive": True},
-                }, # dummy data
+                "personality": access.other.personality,
                 "interests": [{"name": user_interest.interest.name, "amount": user_interest.amount} for user_interest in UserInterest.objects.filter(user=access.other.user) ],
                 "mood": access.other.avatar.mood.name,
             }
