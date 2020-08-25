@@ -84,6 +84,34 @@ class Profile(models.Model):
         self.save()
         return self
 
+    def get_all_interests(self):
+        return [{
+            "id": user_interest.interest.id,
+            "name": user_interest.interest.name,
+            "amount": user_interest.amount,
+            "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
+        } for user_interest in UserInterest.objects.filter(user=self.user)]
+
+    def get_interest(self, pk):
+        try:
+            user_interest = UserInterest.objects.get(user=self.user, interest=pk)
+            return {
+                "name": user_interest.interest.name,
+                "amount": user_interest.amount,
+                "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
+            }
+        except UserInterest.DoesNotExist:
+            return {'error': 'Interest not found.', 'code': 404}
+
+    def get_info(self):
+        return {
+            "nick": self.user.username,
+            "avatar": self.avatar.url,
+            "personality": self.personality,
+            "interests": self.get_all_interests(),
+            "mood": self.avatar.mood.name,
+        }
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

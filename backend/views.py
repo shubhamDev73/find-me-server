@@ -54,13 +54,7 @@ def logout(request):
 @require_GET
 @auth
 def me(request):
-    return {
-        "nick": request.profile.user.username,
-        "avatar": request.profile.avatar.url,
-        "personality": request.profile.personality,
-        "interests": [{"name": user_interest.interest.name, "amount": user_interest.amount} for user_interest in UserInterest.objects.filter(user=request.profile.user) ],
-        "mood": request.profile.avatar.mood.name,
-    }
+    return request.profile.get_info()
 
 @require_GET
 @auth
@@ -96,25 +90,12 @@ def personality_update(request):
 @require_GET
 @auth
 def me_interests(request):
-    return [{
-        "id": user_interest.interest.id,
-        "name": user_interest.interest.name,
-        "amount": user_interest.amount,
-        "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
-    } for user_interest in UserInterest.objects.filter(user=request.profile.user)]
+    return request.profile.get_all_interests()
 
 @require_GET
 @auth
 def me_interest(request, pk):
-    try:
-        user_interest = UserInterest.objects.get(user=request.profile.user, interest=pk)
-        return {
-            "name": user_interest.interest.name,
-            "amount": user_interest.amount,
-            "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
-        }
-    except UserInterest.DoesNotExist:
-        return {'error': 'Interest not found.', 'code': 404}
+    return request.profile.get_interest(pk)
 
 @require_POST
 @auth
@@ -233,13 +214,7 @@ def view(request):
                 access.viewed = True
                 access.view_time = timezone.localtime()
                 access.save()
-            return {
-                "nick": access.other.user.username,
-                "avatar": access.other.avatar.url,
-                "personality": access.other.personality,
-                "interests": [{"name": user_interest.interest.name, "amount": user_interest.amount} for user_interest in UserInterest.objects.filter(user=access.other.user) ],
-                "mood": access.other.avatar.mood.name,
-            }
+            return access.other.get_info()
         else:
             return {'error': 'User not found.', 'code': 404}
     except Access.DoesNotExist:
