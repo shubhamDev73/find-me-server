@@ -1,0 +1,4 @@
+[submodule "algo"]
+	path = algo
+	url = https://github.com/shubhamDev73/find-me-algo.git
+	branch = module
