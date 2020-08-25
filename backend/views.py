@@ -232,8 +232,8 @@ def find(request):
                 "fire": {"value": 0.678, "positive": True},
                 "water": {"value": 0.678, "positive": False},
             }, # dummy data
-        } for access in Access.objects.filter(me=request.profile)],
-        "views-remaining": MAX_PROFILE_VIEWS - Access.objects.filter(me=request.profile).filter(viewed=True).count(),
+        } for access in Access.objects.filter(active=True).filter(me=request.profile)],
+        "views-remaining": MAX_PROFILE_VIEWS - Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count(),
     }
 
 @require_POST
@@ -241,9 +241,9 @@ def find(request):
 def view(request):
     try:
         access = Access.objects.get(pk=request.data['id'])
-        if access.me == request.profile:
+        if access.active and access.me == request.profile:
             if not access.viewed:
-                if Access.objects.filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
+                if Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
                     return {'error': 'Maximum profile views reached.'}
                 access.viewed = True
                 access.view_time = timezone.localtime()
@@ -271,7 +271,7 @@ def view(request):
 def request(request):
     try:
         access = Access.objects.get(pk=request.data['id'])
-        if access.me == request.profile and access.viewed:
+        if access.active and access.me == request.profile and access.viewed:
             if access.requested:
                 return {'error': 'Already requested.'}
             access.requested = True
@@ -288,14 +288,14 @@ def requests(request):
     return [{
         "id": access.id,
         "avatar": access.me.avatar.url,
-    } for access in Access.objects.filter(other=request.profile).filter(requested=True).filter(connected=False)]
+    } for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
 
 @require_POST
 @auth
 def accept(request):
     try:
         access = Access.objects.get(pk=request.data['id'])
-        if access.other == request.profile and access.requested:
+        if access.active and access.other == request.profile and access.requested:
             if access.connected:
                 return {'error': 'Request already accepted.'}
             access.connected = True
@@ -311,23 +311,26 @@ def accept(request):
 @require_GET
 @auth
 def found(request):
-    connects = [(connect.user2, connect.id, connect.retained()) for connect in Connect.objects.filter(user1=request.profile)]
-    connects += [(connect.user1, connect.id, connect.retained()) for connect in Connect.objects.filter(user2=request.profile)]
+    connects = [(connect.user2, connect.id, connect.retained1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
+    connects += [(connect.user1, connect.id, connect.retained2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
     return [{
         "id": id,
         "nick": profile.user.username,
         "avatar": profile.avatar.url,
+        "retain_request_sent": retain_request,
         "retained": retained
-    } for profile, id, retained in connects]
+    } for profile, id, retain_request, retained in connects]
 
 @require_POST
 @auth
 def retain(request):
     try:
-        connect = Connect.objects.get(pk=request.data['id'])
+        connect = Connect.objects.get(active=True, pk=request.data['id'])
+        if connect.retained():
+            return {'error': 'User already retained.'}
         if connect.user1 == request.profile:
             if connect.retained1:
-                return {'error': 'User already retained.'}
+                return {'error': 'Retain request already sent.'}
             connect.retained1 = True
             connect.retain1_time = timezone.localtime()
             if connect.retained2:
@@ -335,7 +338,7 @@ def retain(request):
             connect.save()
         elif connect.user2 == request.profile:
             if connect.retained2:
-                return {'error': 'User already retained.'}
+                return {'error': 'Retain request already sent.'}
             connect.retained2 = True
             connect.retain2_time = timezone.localtime()
             if connect.retained1:

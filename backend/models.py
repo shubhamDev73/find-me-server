@@ -118,6 +118,7 @@ class Access(models.Model):
     me = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='me')
     other = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='other')
     create_time = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=True)
 
     viewed = models.BooleanField(default=False)
     requested = models.BooleanField(default=False)
@@ -134,6 +135,7 @@ class Connect(models.Model):
     user1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='first_user')
     user2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='second_user')
     create_time = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=True)
 
     retained1 = models.BooleanField(default=False)
     retained2 = models.BooleanField(default=False)
