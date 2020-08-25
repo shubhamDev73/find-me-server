@@ -30,6 +30,7 @@ class Profile(models.Model):
     token = models.CharField(max_length=64)
     expired = models.BooleanField(default=False)
     avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
+    personality = models.CharField(max_length=120, default='0'*120)
 
     def __str__(self):
         return str(self.user)
@@ -46,6 +47,22 @@ class Profile(models.Model):
 
         self.token = token
         self.expired = False
+        self.save()
+        return self
+
+    def get_facets(self):
+        values = self.personality
+        facets = [0 for _ in range(30)]
+        for i in range(30):
+            facets[i] = float(f"0.{values[i * 4 : (i + 1) * 4]}")
+        return facets
+
+    def get_personality(self):
+        facets = self.get_facets()
+        return [sum(facets[i * 6 : (i + 1) * 6]) / 6 for i in range(5)]
+
+    def save_facets(self, facets):
+        self.personality = ''.join(("%0.4f" % facets[i])[2:] for i in range(30))
         self.save()
         return self
 

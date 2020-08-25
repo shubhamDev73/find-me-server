@@ -137,7 +137,7 @@ class AccessAdmin(admin.ModelAdmin):
 
     fields = ['me', 'other']
     list_display = ['id', 'me', 'other', 'create_time', 'viewed', 'view_time', 'requested', 'request_time', 'connected', 'connect_time']
-    list_filter = ['me', 'other', 'viewed', 'requested', 'connected']
+    list_filter = ['viewed', 'requested', 'connected', 'me', 'other']
     search_fields = ['me__user__username', 'other__user__username', 'create_time', 'view_time', 'request_time', 'connect_time']
     date_hierarchy = 'create_time'
     show_full_result_count = True
@@ -148,7 +148,7 @@ class ConnectAdmin(admin.ModelAdmin):
 
     fields = ['user1', 'user2']
     list_display = ['id', 'user1', 'user2', 'create_time', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
-    list_filter = ['user1', 'user2', 'retained1', 'retained2']
+    list_filter = ['retained1', 'retained2', 'user1', 'user2']
     search_fields = ['user1__user__username', 'user2__user__username', 'create_time', 'retain1_time', 'retain2_time', 'retain_time']
     date_hierarchy = 'create_time'
     show_full_result_count = True
