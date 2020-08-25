@@ -141,6 +141,12 @@ class AccessAdmin(admin.ModelAdmin):
     search_fields = ['me__user__username', 'other__user__username', 'create_time', 'view_time', 'request_time', 'connect_time']
     date_hierarchy = 'create_time'
 
+    def expire_access(self, request, queryset):
+        queryset.update(active=False)
+    expire_access.short_description = 'Expire accesses'
+
+    actions = [expire_access]
+
 @admin.register(Connect)
 class ConnectAdmin(admin.ModelAdmin):
 
@@ -149,3 +155,9 @@ class ConnectAdmin(admin.ModelAdmin):
     list_filter = ['active', 'retained1', 'retained2', 'user1', 'user2']
     search_fields = ['user1__user__username', 'user2__user__username', 'create_time', 'retain1_time', 'retain2_time', 'retain_time']
     date_hierarchy = 'create_time'
+
+    def expire_connect(self, request, queryset):
+        queryset.update(active=False)
+    expire_connect.short_description = 'Expire connects'
+
+    actions = [expire_connect]
