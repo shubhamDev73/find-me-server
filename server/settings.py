@@ -118,3 +118,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+ML_DIR = os.path.join(BASE_DIR, 'models')
+os.makedirs(ML_DIR, exist_ok=True)

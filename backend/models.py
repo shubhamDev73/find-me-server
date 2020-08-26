@@ -1,9 +1,15 @@
+import os
+import numpy as np
+
 from django.db import models
 from django.contrib.auth.models import User
 
+from server.settings import ML_DIR
 from algo.parameters import *
+from algo.match import *
 
 FLOAT_PRECISION = 4
+NUM_USERS_ACCESS = 5
 
 
 class AvatarBase(models.Model):
@@ -54,13 +60,11 @@ class Profile(models.Model):
 
     @property
     def facets(self):
-        import numpy as np
-
         facets = [float(f"0.{self._personality[i * FLOAT_PRECISION : (i + 1) * FLOAT_PRECISION]}") for i in range(NUM_FACETS)]
         return np.array(facets, np.float)
 
     def get_personality(self):
-        personality = self.facets.reshape((NUM_TRAITS, FACETS_PER_TRAIT)).sum(axis=1) / FACETS_PER_TRAIT
+        personality = self.facets.reshape((NUM_TRAITS, FACETS_PER_TRAIT)).mean(axis=1)
         return (personality - 0.5) * 2
 
     @staticmethod
@@ -74,7 +78,7 @@ class Profile(models.Model):
     @property
     def major_personality(self):
         personality = self.get_personality()
-        indices = abs(personality).argsort()[NUM_TRAITS - NUM_DOMINANT_TRAITS:]
+        indices = np.flip(abs(personality).argsort())[:NUM_DOMINANT_TRAITS]
         return Profile.construct_personality(personality, indices)
 
     def save_facets(self, facets):
@@ -122,6 +126,15 @@ class Profile(models.Model):
             "personality": self.major_personality,
             "mood": self.avatar.mood.name,
         }
+
+    def create_access(self, number=NUM_USERS_ACCESS):
+        model_path = os.path.join(ML_DIR, f"user{self.id}.h5")
+        model = create_model(model_path)
+        results = match_user(model, self, Profile.objects.all(), users_to_match=number)
+        matched_users = results.take(0, axis=1)
+        for other in matched_users:
+            access = Access.objects.create(me=self, other=other)
+            access.save()
 
 class PersonalityQuestionnaire(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
