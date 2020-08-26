@@ -29,7 +29,7 @@ class AuthTokenMiddleware:
         from .models import Profile
 
         request.profile = None
-        code = 200
+        request.auth_error_status_code = 200
         try:
             splits = request.META['HTTP_AUTHORIZATION'].split("Bearer ")
             if len(splits) == 2 and splits[0] == "":
@@ -38,24 +38,26 @@ class AuthTokenMiddleware:
                     profile = Profile.objects.get(token=token)
                     if profile.expired:
                         request.auth_error = 'Auth token expired.'
-                        code = 401
+                        request.auth_error_status_code = 401
                     else:
                         request.profile = profile
                 except Profile.DoesNotExist:
                     request.auth_error = 'Invalid auth token.'
-                    code = 403
+                    request.auth_error_status_code = 403
             else:
                 request.auth_error = 'Invalid auth header.'
-                code = 400
+                request.auth_error_status_code = 400
         except:
             request.auth_error = 'Missing authorization.'
-            code = 403
+            request.auth_error_status_code = 403
 
         data = self.get_response(request)
         if isinstance(data, HttpResponse):
             return data
 
         response = {}
+        code = 200
+
         if type(data) is dict and 'error' in data:
             response['error'] = data.pop('error')
             if 'code' in data:
