@@ -19,9 +19,9 @@
 			<li>/me/personality/ : retrieve information about my personality. {"fire", "water", "air", "earth", "space"}.</li>
 			<li>/me/personality/update/ : (GET, POST) update information about my personality by taking a personality test. GET: {"id", "questions": ["q1", "q2"] }. POST - data: {"id", "answers": [1, 3] }.</li>
 			<li>/me/interests/ : retrieve information about my interests. [ {"id", "name", "amount", "answers": [ {"question", "answer"} ] } ].</li>
-			<li>/me/interests/update/ : (POST) update my interests. data: {"interests": [1, 2, 3], "amounts": [0, 2, 1]}. setting amount to zero will remove that interest.</li>
+			<li>/me/interests/update/ : (POST) update my interests. data: [ {"interest": &lt;interest-id&gt;, "amount": 2} ]. setting amount to zero will remove that interest.</li>
 			<li>/me/interests/&lt;interest-id&gt;/ : retrieve answers about my specific interest.</li>
-			<li>/me/interests/&lt;interest-id&gt;/update/ : (POST) update answers about my interest. data: {"question": &lt;question-id&gt;, "answer": "answer text"}.</li>
+			<li>/me/interests/&lt;interest-id&gt;/update/ : (POST) update answers about my interest. data: [ {"question": &lt;question-id&gt;, "answer": "answer text"} ].</li>
 			<li>/me/avatar/ : retrieve information about my avatar. {"url", "name", "mood", "base", "variants": [{"id", "mood", "url"}, {},..] }.</li>
 			<li>/me/avatar/update/ : (POST) update my avatar. data: {"id": 1}.</li>
 			<li>/interests/ : retrieve all interests. [ {"id", "name"}, {},..].</li>

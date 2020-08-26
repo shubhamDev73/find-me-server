@@ -8,6 +8,10 @@ def create_user_profile(sender, instance, created, **kwargs):
         profile = Profile.objects.create(user=instance)
         profile.new_token()
 
+def delete_zero_interest(sender, instance, created, **kwargs):
+    if not instance.amount:
+        instance.delete()
+
 class UpdateTime:
 
     attrs = {}

@@ -98,37 +98,30 @@ def me_interest(request, pk):
 @require_POST
 @auth
 def update_interests(request):
-    user_interests = UserInterest.objects.filter(user=request.profile, interest__in=request.data['interests'])
-    for user_interest in user_interests:
-        index = request.data['interests'].index(user_interest.interest.pk)
-        if amount := request.data['amounts'][index]:
-            user_interest.amount = request.data['amounts'][index]
+    for data in request.data:
+        try:
+            user_interest = UserInterest.objects.get(user=request.profile, interest=data['interest'])
+            user_interest.amount = data['amount']
+        except UserInterest.DoesNotExist:
+            user_interest = UserInterest.objects.create(user=request.profile, **data) if data['amount'] else None
+
+        if user_interest:
             user_interest.save()
-            request.data['amounts'][index] = 0
-        else:
-            user_interest.delete()
-    try:
-        for index, amount in enumerate(request.data['amounts']):
-            if amount != 0:
-                interest = Interest.objects.get(pk=request.data['interests'][index])
-                user_interest = UserInterest.objects.create(user=request.profile, interest=interest, amount=amount)
-                user_interest.save()
-    except Interest.DoesNotExist:
-        return {'error': 'Interest not found.', 'code': 404}
 
 @require_POST
 @auth
 def update_interest(request, pk):
     try:
         user_interest = UserInterest.objects.get(user=request.profile, interest=pk)
-        question = Question.objects.get(pk=request.data['question'], interest=pk)
-        text = request.data['answer']
-        try:
-            answer = Answer.objects.get(user_interest=user_interest, question=question)
-            answer.text = text
-        except Answer.DoesNotExist:
-            answer = Answer.objects.create(user_interest=user_interest, question=question, text=text)
-        answer.save()
+        for data in request.data:
+            question = Question.objects.get(pk=data['question'], interest=pk)
+            text = data['answer']
+            try:
+                answer = Answer.objects.get(user_interest=user_interest, question=question)
+                answer.text = text
+            except Answer.DoesNotExist:
+                answer = Answer.objects.create(user_interest=user_interest, question=question, text=text)
+            answer.save()
     except UserInterest.DoesNotExist:
         return {'error': 'Interest not found.', 'code': 404}
     except Question.DoesNotExist:
