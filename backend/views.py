@@ -24,7 +24,7 @@ def register(request):
             validate_password(request.data['password'], user)
             token = user.profile.token
         except ValidationError as e:
-            error = list(e)
+            error = '\n'.join(list(e))
             user.delete()
     except:
         error = 'Username already exists.'
@@ -263,7 +263,7 @@ def found(request):
         "nick": profile.user.username,
         "avatar": profile.avatar.url,
         "retain_request_sent": retain_request,
-        "retained": retained
+        "retained": retained,
     } for profile, id, retain_request, retained in connects]
 
 @require_POST
