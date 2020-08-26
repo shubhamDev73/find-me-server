@@ -3,8 +3,8 @@ import numpy as np
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
-from server.settings import ML_DIR
 from algo.parameters import *
 from algo.match import *
 
@@ -12,9 +12,19 @@ FLOAT_PRECISION = 4
 NUM_USERS_ACCESS = 5
 
 
+def avatar_base_path(instance, filename):
+    return f'avatars/{instance.name.lower()}/{filename}'
+
+def avatar_path(instance, filename):
+    return f'avatars/{instance.base.name.lower()}/{instance.mood.name.lower()}/{filename}'
+
 class AvatarBase(models.Model):
     name = models.CharField(max_length=20)
-    url = models.URLField()
+    image = models.ImageField(upload_to=avatar_base_path)
+
+    @property
+    def url(self):
+        return f"{settings.HOST}{self.image.url}"
 
     def __str__(self):
         return self.name
@@ -28,7 +38,11 @@ class Mood(models.Model):
 class Avatar(models.Model):
     base = models.ForeignKey(AvatarBase, on_delete=models.CASCADE)
     mood = models.ForeignKey(Mood, on_delete=models.CASCADE)
-    url = models.URLField()
+    image = models.ImageField(upload_to=avatar_path)
+
+    @property
+    def url(self):
+        return f"{settings.HOST}{self.image.url}"
 
     def __str__(self):
         return f"{str(self.base)} ({str(self.mood)})"
@@ -128,7 +142,7 @@ class Profile(models.Model):
         }
 
     def create_access(self, number=NUM_USERS_ACCESS):
-        model_path = os.path.join(ML_DIR, f"user{self.id}.h5")
+        model_path = os.path.join(settings.ML_DIR, f"user{self.id}.h5")
         model = create_model(model_path)
         results = match_user(model, self, Profile.objects.all(), users_to_match=number)
         matched_users = results.take(0, axis=1)

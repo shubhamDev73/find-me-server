@@ -26,7 +26,8 @@ with open(os.path.join(BASE_DIR, 'django-key.txt')) as f:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+HOST = 'localhost:8000'
+ALLOWED_HOSTS = [HOST.split(':')[0]]
 
 
 # Application definition
@@ -118,6 +119,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ML_DIR = os.path.join(BASE_DIR, 'models')
 os.makedirs(ML_DIR, exist_ok=True)
