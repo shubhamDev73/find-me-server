@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 from algo.parameters import *
 
@@ -111,12 +109,6 @@ class Profile(models.Model):
             "interests": self.get_all_interests(),
             "mood": self.avatar.mood.name,
         }
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        profile = Profile.objects.create(user=instance)
-        profile.new_token()
 
 class PersonalityQuestionnaire(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

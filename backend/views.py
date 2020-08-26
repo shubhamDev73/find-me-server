@@ -3,7 +3,6 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
-from django.utils import timezone
 
 from .decorators import auth
 from .models import *
@@ -81,7 +80,6 @@ def personality_update(request):
             if questionnaire.submitted:
                 return {'error': 'Questionnaire already answered.'}
             questionnaire.submitted = True
-            questionnaire.submit_time = timezone.localtime()
             questionnaire.save()
             # update user personality based on answers
         except PersonalityQuestionnaire.DoesNotExist:
@@ -212,7 +210,6 @@ def view(request):
                 if Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
                     return {'error': 'Maximum profile views reached.'}
                 access.viewed = True
-                access.view_time = timezone.localtime()
                 access.save()
             return access.other.get_info()
         else:
@@ -229,7 +226,6 @@ def request(request):
             if access.requested:
                 return {'error': 'Already requested.'}
             access.requested = True
-            access.request_time = timezone.localtime()
             access.save()
         else:
             return {'error': 'User not found.', 'code': 404}
@@ -253,10 +249,7 @@ def accept(request):
             if access.connected:
                 return {'error': 'Request already accepted.'}
             access.connected = True
-            access.connect_time = timezone.localtime()
             access.save()
-            connect = Connect.objects.create(user1=access.me, user2=access.other)
-            connect.save()
         else:
             return {'error': 'Request not found.', 'code': 404}
     except Access.DoesNotExist:
@@ -286,17 +279,11 @@ def retain(request):
             if connect.retained1:
                 return {'error': 'Retain request already sent.'}
             connect.retained1 = True
-            connect.retain1_time = timezone.localtime()
-            if connect.retained2:
-                connect.retain_time = timezone.localtime()
             connect.save()
         elif connect.user2 == request.profile:
             if connect.retained2:
                 return {'error': 'Retain request already sent.'}
             connect.retained2 = True
-            connect.retain2_time = timezone.localtime()
-            if connect.retained1:
-                connect.retain_time = timezone.localtime()
             connect.save()
         else:
             return {'error': 'Connect not found.', 'code': 404}
