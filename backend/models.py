@@ -88,11 +88,11 @@ class Profile(models.Model):
             "name": user_interest.interest.name,
             "amount": user_interest.amount,
             "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
-        } for user_interest in UserInterest.objects.filter(user=self.user)]
+        } for user_interest in UserInterest.objects.filter(user=self)]
 
     def get_interest(self, pk):
         try:
-            user_interest = UserInterest.objects.get(user=self.user, interest=pk)
+            user_interest = UserInterest.objects.get(user=self, interest=pk)
             return {
                 "name": user_interest.interest.name,
                 "amount": user_interest.amount,
@@ -111,7 +111,7 @@ class Profile(models.Model):
         }
 
 class PersonalityQuestionnaire(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     submitted = models.BooleanField(default=False)
     create_time = models.DateTimeField(auto_now_add=True)
     submit_time = models.DateTimeField(null=True)
@@ -126,7 +126,7 @@ class Interest(models.Model):
         return self.name
 
 class UserInterest(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     interest = models.ForeignKey(Interest, on_delete=models.CASCADE)
     amount = models.IntegerField(default=0)
 

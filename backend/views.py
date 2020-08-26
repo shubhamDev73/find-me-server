@@ -65,9 +65,9 @@ def personality(request):
 def personality_update(request):
     if request.method == "GET":
         try:
-            questionnaire = PersonalityQuestionnaire.objects.get(user=request.profile.user, submitted=False)
+            questionnaire = PersonalityQuestionnaire.objects.get(user=request.profile, submitted=False)
         except PersonalityQuestionnaire.DoesNotExist:
-            questionnaire = PersonalityQuestionnaire.objects.create(user=request.profile.user)
+            questionnaire = PersonalityQuestionnaire.objects.create(user=request.profile)
         return {
             "id": questionnaire.id,
             "questions": ["How extrovert are you?", "How depressed are you?"], # dummy data
@@ -75,7 +75,7 @@ def personality_update(request):
     else:
         try:
             questionnaire = PersonalityQuestionnaire.objects.get(pk=request.data['id'])
-            if questionnaire.user != request.profile.user:
+            if questionnaire.user != request.profile:
                 return {'error': 'Invalid questionnaire.'}
             if questionnaire.submitted:
                 return {'error': 'Questionnaire already answered.'}
@@ -98,7 +98,7 @@ def me_interest(request, pk):
 @require_POST
 @auth
 def update_interests(request):
-    user_interests = UserInterest.objects.filter(user=request.profile.user, interest__in=request.data['interests'])
+    user_interests = UserInterest.objects.filter(user=request.profile, interest__in=request.data['interests'])
     for user_interest in user_interests:
         index = request.data['interests'].index(user_interest.interest.pk)
         if amount := request.data['amounts'][index]:
@@ -111,7 +111,7 @@ def update_interests(request):
         for index, amount in enumerate(request.data['amounts']):
             if amount != 0:
                 interest = Interest.objects.get(pk=request.data['interests'][index])
-                user_interest = UserInterest.objects.create(user=request.profile.user, interest=interest, amount=amount)
+                user_interest = UserInterest.objects.create(user=request.profile, interest=interest, amount=amount)
                 user_interest.save()
     except Interest.DoesNotExist:
         return {'error': 'Interest not found.', 'code': 404}
@@ -120,7 +120,7 @@ def update_interests(request):
 @auth
 def update_interest(request, pk):
     try:
-        user_interest = UserInterest.objects.get(user=request.profile.user, interest=pk)
+        user_interest = UserInterest.objects.get(user=request.profile, interest=pk)
         question = Question.objects.get(pk=request.data['question'])
         text = request.data['answer']
         try:
