@@ -121,7 +121,7 @@ def update_interests(request):
 def update_interest(request, pk):
     try:
         user_interest = UserInterest.objects.get(user=request.profile, interest=pk)
-        question = Question.objects.get(pk=request.data['question'])
+        question = Question.objects.get(pk=request.data['question'], interest=pk)
         text = request.data['answer']
         try:
             answer = Answer.objects.get(user_interest=user_interest, question=question)
