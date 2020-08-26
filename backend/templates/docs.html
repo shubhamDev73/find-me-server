@@ -21,7 +21,7 @@
 			<li>/me/interests/ : retrieve information about my interests. [ {"id", "name", "amount", "answers": [ {"question", "answer"} ] } ].</li>
 			<li>/me/interests/update/ : (POST) update my interests. data: [ {"interest": &lt;interest-id&gt;, "amount": 2} ]. setting amount to zero will remove that interest.</li>
 			<li>/me/interests/&lt;interest-id&gt;/ : retrieve answers about my specific interest.</li>
-			<li>/me/interests/&lt;interest-id&gt;/update/ : (POST) update answers about my interest. data: [ {"question": &lt;question-id&gt;, "answer": "answer text"} ].</li>
+			<li>/me/interests/&lt;interest-id&gt;/update/ : (POST) update answers about my interest. data: [ {"question": &lt;question-id&gt;, "answer": "answer text"} ]. empty answer string deletes that answer.</li>
 			<li>/me/avatar/ : retrieve information about my avatar. {"url", "name", "mood", "base", "variants": [{"id", "mood", "url"}, {},..] }.</li>
 			<li>/me/avatar/update/ : (POST) update my avatar. data: {"id": 1}.</li>
 			<li>/interests/ : retrieve all interests. [ {"id", "name"}, {},..].</li>

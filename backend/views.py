@@ -118,10 +118,15 @@ def update_interest(request, pk):
             text = data['answer']
             try:
                 answer = Answer.objects.get(user_interest=user_interest, question=question)
-                answer.text = text
+                if text:
+                    answer.text = text
+                else:
+                    answer.delete()
+                    answer = None
             except Answer.DoesNotExist:
-                answer = Answer.objects.create(user_interest=user_interest, question=question, text=text)
-            answer.save()
+                answer = Answer.objects.create(user_interest=user_interest, question=question, text=text) if text else None
+            if answer:
+                answer.save()
     except UserInterest.DoesNotExist:
         return {'error': 'Interest not found.', 'code': 404}
     except Question.DoesNotExist:
