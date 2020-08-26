@@ -2,3 +2,4 @@ __pycache__/
 *.sqlite3
 django-key.txt
 models/*
+media/**

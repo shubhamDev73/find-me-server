@@ -1,21 +1,20 @@
+import json
+from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
+
+from .models import Profile
+
+
 class PostJsonMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-
-        import json
-
         if request.method == "POST":
-            if string := request.body.decode("utf-8"):
-                try:
-                    request.data = json.loads(string)
-                except:
-                    pass
-            else:
+            try:
+                request.data = json.loads(request.body.decode("utf-8"))
+            except:
                 request.data = {}
-
         return self.get_response(request)
 
 class AuthTokenMiddleware:
@@ -24,9 +23,6 @@ class AuthTokenMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-
-        from django.http import HttpResponse, JsonResponse
-        from .models import Profile
 
         request.profile = None
         request.auth_error_status_code = 200
@@ -52,7 +48,7 @@ class AuthTokenMiddleware:
             request.auth_error_status_code = 403
 
         data = self.get_response(request)
-        if isinstance(data, HttpResponse):
+        if isinstance(data, HttpResponse) or isinstance(data, StreamingHttpResponse):
             return data
 
         response = {}

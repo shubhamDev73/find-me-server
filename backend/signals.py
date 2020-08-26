@@ -1,7 +1,7 @@
 import os
 from django.utils import timezone
+from django.conf import settings
 
-from server.settings import ML_DIR
 from .models import Profile, Connect
 
 from algo.match import create_model, train_model
@@ -12,13 +12,13 @@ def create_user_profile(sender, instance, created, **kwargs):
         profile.new_token()
 
         model = create_model()
-        model_path = os.path.join(ML_DIR, f"user{profile.id}.h5")
+        model_path = os.path.join(settings.ML_DIR, f"user{profile.id}.h5")
         train_model(model, filepath=model_path)
 
         profile.create_access()
 
 def delete_model(sender, instance, **kwargs):
-    os.remove(os.path.join(ML_DIR, f"user{instance.id}.h5"))
+    os.remove(os.path.join(settings.ML_DIR, f"user{instance.id}.h5"))
 
 def delete_zero_interest(sender, instance, created, **kwargs):
     if not instance.amount:
