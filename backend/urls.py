@@ -1,44 +1,66 @@
-from django.urls import path
+from django.urls import path, include
 
 from . import views
 
-
-urlpatterns = [
-    path('', views.index, name='index'),
+urls_auth = [
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
+]
 
+urls_interests = [
+    path('', views.interests, name='index'),
+    path('<int:pk>/', views.interest, name='interest'),
+]
 
-    path('me/', views.me, name='me'),
+urls_avatars = [
+    path('', views.base_avatars, name='index'),
+    path('<int:pk>/', views.avatars, name='avatars'),
+]
 
-	path('me/personality/', views.personality, name='personality'),
-    path('me/personality/update/', views.personality_update, name='personality_update'),
+urls_data = [
+    path('interests/', include(urls_interests), name='interests'),
+    path('avatars/', include(urls_avatars), name='avatars'),
+]
 
-    path('me/interests/', views.me_interests, name='me_interests'),
-    path('me/interests/update/', views.update_interests, name='update_interests'),
-    path('me/interests/<int:pk>/', views.me_interest, name='me_interest'),
-    path('me/interests/<int:pk>/update/', views.update_interest, name='update_interest'),
+urls_me = [
+    path('', views.me, name='index'),
 
-    path('me/avatar/', views.me_avatar, name='me_avatar'),
-    path('me/avatar/update/', views.me_avatar_update, name='me_avatar_update'),
+	path('personality/', views.personality, name='personality'),
+    path('personality/update/', views.personality_update, name='personality_update'),
 
+    path('interests/', views.me_interests, name='interests'),
+    path('interests/update/', views.update_interests, name='update_interests'),
+    path('interests/<int:pk>/', views.me_interest, name='interest'),
+    path('interests/<int:pk>/update/', views.update_interest, name='update_interest'),
 
-    path('interests/', views.interests, name='interests'),
-    path('interests/<int:pk>/', views.interest, name='interest'),
+    path('avatar/', views.me_avatar, name='avatar'),
+    path('avatar/update/', views.me_avatar_update, name='avatar_update'),
+]
 
-    path('avatars/', views.base_avatars, name='base_avatars'),
-    path('avatars/<int:pk>/', views.avatars, name='avatars'),
+urls_find = [
+    path('', views.find, name='index'),
+    path('<int:pk>/', views.find_view, name='view'),
+    path('request/', views.request, name='request'),
+]
 
+urls_requests = [
+    path('', views.requests, name='index'),
+    path('accept/', views.accept, name='accept'),
+]
 
-    path('find/', views.find, name='find'),
-    path('find/<int:pk>/', views.find_view, name='find_view'),
-    path('find/request/', views.request, name='request'),
+urls_found = [
+    path('', views.found, name='index'),
+    path('<int:pk>/', views.found_view, name='view'),
+    path('retain/', views.retain, name='retain'),
+]
 
-    path('requests/', views.requests, name='requests'),
-    path('requests/accept/', views.accept, name='accept'),
-
-    path('found/', views.found, name='found'),
-    path('found/<int:pk>/', views.found_view, name='found_view'),
-    path('found/retain/', views.retain, name='retain'),
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('', include(urls_auth), name='auth'),
+    path('', include(urls_data), name='data'),
+    path('me/', include(urls_me), name='me'),
+    path('find/', include(urls_find), name='find'),
+    path('requests/', include(urls_requests), name='requests'),
+    path('found/', include(urls_found), name='found'),
 ]
