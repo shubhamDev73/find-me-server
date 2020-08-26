@@ -7,7 +7,7 @@ from .models import Profile, Connect
 from algo.match import create_model, train_model
 
 def create_user_profile(sender, instance, created, **kwargs):
-    if created:
+    if created and not instance.is_staff:
         profile = Profile.objects.create(user=instance)
         profile.new_token()
 
