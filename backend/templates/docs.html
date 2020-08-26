@@ -53,7 +53,7 @@
 			<h3>/find/</h3>
 			<ul>
 				<li>/ : retrieve all users I can find. {"views-remaining", "users": [{"id", "avatar", "mood", "personality"}, {},..] }.</li>
-				<li>/view/ : (POST) view a user. data: {"id": 1}. returns same data as /me/. returns error if max views exceeded.</li>
+				<li>/&lt;id&gt;/ : view a user info. returns same data as /me/. returns error if max views exceeded.</li>
 				<li>/request/ : (POST) request a connection from this user. returns error if not viewed or already requested.</li>
 			</ul>
 
@@ -65,7 +65,8 @@
 
 			<h3>/found/</h3>
 			<ul>
-				<li>/ : retrieve all users connected with me. [ {"id", "nick", "avatar", "retain_request_sent", "retained"}, {},..].</li>
+				<li>/ : retrieve all users connected with me. [ {"id", "nick", "avatar", "interests", "retain_request_sent", "retained"}, {},..].</li>
+				<li>/&lt;id&gt;/ : view a user info. returns same data as /me/.</li>
 				<li>/retain/ : (POST) retain a connected user. data: {"id": 1}.</li>
 			</ul>
 		</ul>

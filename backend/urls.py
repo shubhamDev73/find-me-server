@@ -32,12 +32,13 @@ urlpatterns = [
 
 
     path('find/', views.find, name='find'),
-    path('find/view/', views.view, name='view'),
+    path('find/<int:pk>/', views.find_view, name='find_view'),
     path('find/request/', views.request, name='request'),
 
     path('requests/', views.requests, name='requests'),
     path('requests/accept/', views.accept, name='accept'),
 
     path('found/', views.found, name='found'),
+    path('found/<int:pk>/', views.found_view, name='found_view'),
     path('found/retain/', views.retain, name='retain'),
 ]

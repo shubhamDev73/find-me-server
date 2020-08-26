@@ -82,12 +82,18 @@ class Profile(models.Model):
         self.save()
         return self
 
-    def get_all_interests(self):
+    def get_all_interests(self, answers=True):
         return [{
-            "id": user_interest.interest.id,
-            "name": user_interest.interest.name,
-            "amount": user_interest.amount,
-            "answers": [{"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)]
+            **{
+                "id": user_interest.interest.id,
+                "name": user_interest.interest.name,
+                "amount": user_interest.amount,
+            },
+            **({
+                "answers": [
+                    {"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)
+                ]
+            } if answers else {})
         } for user_interest in UserInterest.objects.filter(user=self)]
 
     def get_interest(self, pk):
@@ -101,12 +107,19 @@ class Profile(models.Model):
         except UserInterest.DoesNotExist:
             return {'error': 'Interest not found.', 'code': 404}
 
-    def get_info(self):
+    def get_info(self, interest_answers=True):
         return {
             "nick": self.user.username,
             "avatar": self.avatar.url,
             "personality": self.personality,
-            "interests": self.get_all_interests(),
+            "interests": self.get_all_interests(interest_answers),
+            "mood": self.avatar.mood.name,
+        }
+
+    def get_partial_info(self):
+        return {
+            "avatar": self.avatar.url,
+            "personality": self.major_personality,
             "mood": self.avatar.mood.name,
         }
 

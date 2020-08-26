@@ -189,20 +189,15 @@ def avatars(request, pk):
 @auth
 def find(request):
     return {
-        "users": [{
-            "id": access.id,
-            "avatar": access.other.avatar.url,
-            "mood": access.other.avatar.mood.name,
-            "personality": access.other.major_personality,
-        } for access in Access.objects.filter(active=True).filter(me=request.profile)],
+        "users": [{**access.other.get_partial_info(), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(me=request.profile)],
         "views-remaining": MAX_PROFILE_VIEWS - Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count(),
     }
 
-@require_POST
+@require_GET
 @auth
-def view(request):
+def find_view(request, pk):
     try:
-        access = Access.objects.get(pk=request.data['id'])
+        access = Access.objects.get(pk=pk)
         if access.active and access.me == request.profile:
             if not access.viewed:
                 if Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
@@ -210,10 +205,9 @@ def view(request):
                 access.viewed = True
                 access.save()
             return access.other.get_info()
-        else:
-            return {'error': 'User not found.', 'code': 404}
     except Access.DoesNotExist:
-        return {'error': 'User not found.', 'code': 404}
+        pass
+    return {'error': 'User not found.', 'code': 404}
 
 @require_POST
 @auth
@@ -225,10 +219,10 @@ def request(request):
                 return {'error': 'Already requested.'}
             access.requested = True
             access.save()
-        else:
-            return {'error': 'User not found.', 'code': 404}
+            return
     except Access.DoesNotExist:
-        return {'error': 'User not found.', 'code': 404}
+        pass
+    return {'error': 'User not found.', 'code': 404}
 
 @require_GET
 @auth
@@ -248,23 +242,35 @@ def accept(request):
                 return {'error': 'Request already accepted.'}
             access.connected = True
             access.save()
-        else:
-            return {'error': 'Request not found.', 'code': 404}
+            return
     except Access.DoesNotExist:
-        return {'error': 'Request not found.', 'code': 404}
+        pass
+    return {'error': 'Request not found.', 'code': 404}
 
 @require_GET
 @auth
 def found(request):
     connects = [(connect.user2, connect.id, connect.retained1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
     connects += [(connect.user1, connect.id, connect.retained2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
-    return [{
+    return [{**profile.get_info(interest_answers=False), **{
         "id": id,
-        "nick": profile.user.username,
-        "avatar": profile.avatar.url,
         "retain_request_sent": retain_request,
         "retained": retained,
-    } for profile, id, retain_request, retained in connects]
+    }} for profile, id, retain_request, retained in connects]
+
+@require_GET
+@auth
+def found_view(request, pk):
+    try:
+        connect = Connect.objects.get(pk=pk)
+        if connect.active:
+            if connect.user1 == request.profile:
+                return connect.user2.get_info()
+            if connect.user2 == request.profile:
+                return connect.user1.get_info()
+    except Connect.DoesNotExist:
+        pass
+    return {'error': 'User not found.', 'code': 404}
 
 @require_POST
 @auth
@@ -278,12 +284,13 @@ def retain(request):
                 return {'error': 'Retain request already sent.'}
             connect.retained1 = True
             connect.save()
-        elif connect.user2 == request.profile:
+            return
+        if connect.user2 == request.profile:
             if connect.retained2:
                 return {'error': 'Retain request already sent.'}
             connect.retained2 = True
             connect.save()
-        else:
-            return {'error': 'Connect not found.', 'code': 404}
+            return
     except Connect.DoesNotExist:
-        return {'error': 'Connect not found.', 'code': 404}
+        pass
+    return {'error': 'Connect not found.', 'code': 404}
