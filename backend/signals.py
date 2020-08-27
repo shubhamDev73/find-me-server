@@ -1,21 +1,20 @@
 import os
+import threading
 from django.utils import timezone
 from django.conf import settings
+from django.core.management import call_command
 
 from .models import Profile, Connect
 
-from algo.match import create_model, train_model
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created and not instance.is_staff:
         profile = Profile.objects.create(user=instance)
         profile.new_token()
 
-        model = create_model()
-        model_path = os.path.join(settings.ML_DIR, f"user{profile.id}.h5")
-        train_model(model, filepath=model_path)
-
-        profile.create_access()
+        t = threading.Thread(target=call_command, args=("ml", ), kwargs={"id": profile.id, "train": True})
+        t.setDaemon(True)
+        t.start()
 
 def delete_model(sender, instance, **kwargs):
     os.remove(os.path.join(settings.ML_DIR, f"user{instance.id}.h5"))

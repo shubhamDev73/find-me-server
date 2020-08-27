@@ -2,6 +2,7 @@ import datetime
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.core.management import call_command
 
 from backend.models import Access
 
@@ -21,7 +22,7 @@ class Command(BaseCommand):
             count_users = {user: users.count(user) for user in users}
             for me in count_users:
                 self.stdout.write(f"Creating {count_users[me]} new entries for user: {me.id} - {me}")
-                me.create_access(count_users[me])
+                call_command("ml", id=me.id, train=False, users=count_users[me])
             self.stdout.write(f"Expiring {len(objects)} old entries")
             objects.update(active=False)
         else:

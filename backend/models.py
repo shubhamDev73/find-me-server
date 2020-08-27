@@ -6,10 +6,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from algo.parameters import *
-from algo.match import *
 
 FLOAT_PRECISION = 4
-NUM_USERS_ACCESS = 5
 
 
 def avatar_base_path(instance, filename):
@@ -149,15 +147,6 @@ class Profile(models.Model):
         if length := np.linalg.norm(vector):
             return vector / length
         return vector
-
-    def create_access(self, number=NUM_USERS_ACCESS):
-        model_path = os.path.join(settings.ML_DIR, f"user{self.id}.h5")
-        model = create_model(model_path)
-        results = match_user(model, self, Profile.objects.all(), users_to_match=number)
-        matched_users = results.take(0, axis=1)
-        for other in matched_users:
-            access = Access.objects.create(me=self, other=other)
-            access.save()
 
 class PersonalityQuestionnaire(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
