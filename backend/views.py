@@ -227,7 +227,7 @@ def request(request):
 @require_GET
 @auth
 def views(request):
-    return [{**access.me.get_info(answers=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(viewed=True).filter(requested=False)]
+    return [{**access.me.get_info(interest_answers=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(viewed=True).filter(requested=False)]
 
 @require_GET
 @auth
@@ -243,7 +243,7 @@ def view_view(request, pk):
 @require_GET
 @auth
 def requests(request):
-    return [{**access.me.get_info(answers=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
+    return [{**access.me.get_info(interest_answers=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
 
 @require_GET
 @auth
