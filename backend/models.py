@@ -78,8 +78,7 @@ class Profile(models.Model):
         return np.array(facets, np.float)
 
     def get_personality(self):
-        personality = self.facets.reshape((NUM_TRAITS, FACETS_PER_TRAIT)).mean(axis=1)
-        return (personality - 0.5) * 2
+        return personality_from_facets(self.facets)
 
     @staticmethod
     def construct_personality(personality, indices):
