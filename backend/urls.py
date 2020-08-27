@@ -44,6 +44,11 @@ urls_find = [
     path('request/', views.request, name='request'),
 ]
 
+urls_views = [
+    path('', views.views, name='index'),
+    path('<int:pk>/', views.view_view, name='view'),
+]
+
 urls_requests = [
     path('', views.requests, name='index'),
     path('<int:pk>/', views.request_view, name='view'),
@@ -62,6 +67,7 @@ urlpatterns = [
     path('', include(urls_data), name='data'),
     path('me/', include(urls_me), name='me'),
     path('find/', include(urls_find), name='find'),
+    path('views/', include(urls_views), name='views'),
     path('requests/', include(urls_requests), name='requests'),
     path('found/', include(urls_found), name='found'),
 ]
