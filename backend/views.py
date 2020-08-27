@@ -8,7 +8,7 @@ from .decorators import auth
 from .models import *
 
 
-MAX_PROFILE_VIEWS = 5
+MAX_PROFILE_VIEWS = 0
 
 @require_GET
 def index(request):
@@ -200,7 +200,7 @@ def find_view(request, pk):
         access = Access.objects.get(pk=pk)
         if access.active and access.me == request.profile:
             if not access.viewed:
-                if Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
+                if MAX_PROFILE_VIEWS and Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count() >= MAX_PROFILE_VIEWS:
                     return {'error': 'Maximum profile views reached.'}
                 access.viewed = True
                 access.save()
