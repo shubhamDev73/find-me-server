@@ -22,6 +22,7 @@ def register(request):
         user = User.objects.create_user(request.data['username'], password=request.data['password'])
         try:
             validate_password(request.data['password'], user)
+            auth_login(request, user)
             token = user.profile.token
         except ValidationError as e:
             error = '\n'.join(list(e))

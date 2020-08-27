@@ -51,6 +51,10 @@ class AuthTokenMiddleware:
         if isinstance(data, HttpResponse) or isinstance(data, StreamingHttpResponse):
             return data
 
+        request.session.pop('_auth_user_id', None)
+        request.session.pop('_auth_user_backend', None)
+        request.session.pop('_auth_user_hash', None)
+
         response = {}
         code = 200
 
