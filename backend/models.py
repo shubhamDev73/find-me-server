@@ -22,7 +22,7 @@ class AvatarBase(models.Model):
 
     @property
     def url(self):
-        return f"{settings.HOST}{self.image.url}"
+        return f"http://{settings.HOST}{self.image.url}"
 
     def __str__(self):
         return self.name
@@ -40,7 +40,7 @@ class Avatar(models.Model):
 
     @property
     def url(self):
-        return f"{settings.HOST}{self.image.url}"
+        return f"http://{settings.HOST}{self.image.url}"
 
     def __str__(self):
         return f"{str(self.base)} ({str(self.mood)})"
