@@ -46,6 +46,7 @@ urls_find = [
 
 urls_requests = [
     path('', views.requests, name='index'),
+    path('<int:pk>/', views.request_view, name='view'),
     path('accept/', views.accept, name='accept'),
 ]
 

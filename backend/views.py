@@ -227,10 +227,18 @@ def request(request):
 @require_GET
 @auth
 def requests(request):
-    return [{
-        "id": access.id,
-        "avatar": access.me.avatar.url,
-    } for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
+    return [{**access.me.get_info(answers=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
+
+@require_GET
+@auth
+def request_view(request, pk):
+    try:
+        access = Access.objects.get(pk=pk)
+        if access.active and access.requested and not access.connected and access.other == request.profile:
+            return access.me.get_info()
+    except Access.DoesNotExist:
+        pass
+    return {'error': 'User not found.', 'code': 404}
 
 @require_POST
 @auth
