@@ -141,6 +141,16 @@ class Profile(models.Model):
             "mood": self.avatar.mood.name,
         }
 
+    @property
+    def interests(self):
+        all_interests = self.get_all_interests(answers=False)
+        vector = np.zeros(Interest.objects.last().pk, dtype=float)
+        for interest in all_interests:
+            vector.itemset(interest['id'] - 1, interest['amount'])
+        if length := np.linalg.norm(vector):
+            return vector / length
+        return vector
+
     def create_access(self, number=NUM_USERS_ACCESS):
         model_path = os.path.join(settings.ML_DIR, f"user{self.id}.h5")
         model = create_model(model_path)
