@@ -78,19 +78,15 @@ class Profile(models.Model):
     def get_personality(self):
         return personality_from_facets(self.facets)
 
-    @staticmethod
-    def construct_personality(personality, indices):
-        return {Personality(index).name: personality[index] for index in indices}
-
     @property
     def personality(self):
-        return Profile.construct_personality(self.get_personality(), range(NUM_TRAITS))
+        return personality_representation(self.get_personality(), range(NUM_TRAITS))
 
     @property
     def major_personality(self):
         personality = self.get_personality()
         indices = np.flip(abs(personality).argsort())[:NUM_DOMINANT_TRAITS]
-        return Profile.construct_personality(personality, indices)
+        return personality_representation(personality, indices)
 
     def save_facets(self, facets):
         self._personality = ''.join((f"%0.{FLOAT_PRECISION}f" % facets[i])[2:] for i in range(NUM_FACETS))
