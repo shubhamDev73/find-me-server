@@ -89,7 +89,7 @@ class Profile(models.Model):
         return personality_representation(personality, indices)
 
     def save_facets(self, facets):
-        self._personality = ''.join((f"%0.{FLOAT_PRECISION}f" % facets[i])[2:] for i in range(NUM_FACETS))
+        self._personality = ''.join((f"%0.{FLOAT_PRECISION}f" % facets[i])[2:] if facets[i] < 1 else "9" * FLOAT_PRECISION for i in range(NUM_FACETS))
         self.save()
         return self
 
