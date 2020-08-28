@@ -59,7 +59,7 @@ def me(request):
 @require_GET
 @auth
 def personality(request):
-    return request.profile.personality
+    return request.profile.traits
 
 @require_http_methods(["GET", "POST"])
 @auth

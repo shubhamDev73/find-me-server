@@ -144,6 +144,38 @@ class Profile(models.Model):
             return vector / length
         return vector
 
+    @property
+    def traits(self):
+        personality = self.get_personality()
+        traits = {}
+        for index, value in enumerate(personality):
+            trait = Personality(index)
+            adjs = Adjective.objects.filter(trait=trait)
+            if value > 0:
+                adjs = adjs.filter(intensity__range=(0, value))
+            else:
+                adjs = adjs.filter(intensity__range=(value, 0))
+            traits[trait.name] = {"value": value, "adjectives": [{"name": adj.name, "description": adj.description} for adj in adjs]}
+        return traits
+
+class Adjective(models.Model):
+
+    TraitChoices = [
+        (Personality.earth.value, 'Earth'),
+        (Personality.fire.value, 'Fire'),
+        (Personality.water.value, 'Water'),
+        (Personality.space.value, 'Space'),
+        (Personality.air.value, 'Air'),
+    ]
+
+    name = models.CharField(max_length=20)
+    trait = models.IntegerField(choices=TraitChoices)
+    intensity = models.FloatField()
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
 class PersonalityQuestionnaire(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     submitted = models.BooleanField(default=False)

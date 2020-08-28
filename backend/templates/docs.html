@@ -21,7 +21,7 @@
 				<li>/ : retrieve information about me. {"nick", "avatar", "personality", "interests", "mood"}.</li>
 				<h4>/personality/</h4>
 				<ul>
-					<li>/ : retrieve information about my personality. {"fire", "water", "air", "earth", "space"}.</li>
+					<li>/ : retrieve information about my personality. {"fire": {"value", "adjectives": [ {"name", "description"} ] }, "water", "air", "earth", "space"}.</li>
 					<li>/update/ : (GET, POST) update information about my personality by taking a personality test. GET: {"id", "questions": ["q1", "q2"] }. POST - data: {"id", "answers": [1, 3] }.</li>
 				</ul>
 				<h4>/interests/</h4>

@@ -40,6 +40,14 @@ class ProfileAdmin(admin.ModelAdmin):
 
     actions = [expire_tokens]
 
+@admin.register(Adjective)
+class AdjectiveAdmin(admin.ModelAdmin):
+
+    fields = ['name', 'trait', 'intensity', 'description']
+    list_display = ['name', 'trait', 'intensity', 'description']
+    list_filter = ['trait']
+    search_fields = ['name', 'description']
+
 @admin.register(PersonalityQuestionnaire)
 class PersonalityQuestionnaireAdmin(admin.ModelAdmin):
 
