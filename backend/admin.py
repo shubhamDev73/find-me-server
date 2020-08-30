@@ -7,6 +7,37 @@ from .models import *
 admin.site.site_title = "Find Me"
 admin.site.site_header = "Find Me - Admin Panel"
 
+class BaseModelAdmin(admin.ModelAdmin):
+
+    def get_fields(self, request, obj=None):
+        if not (fields := self.fields):
+            fields = super().get_fields(request, obj)
+        try:
+            return fields if obj else self.add_fields
+        except:
+            return fields
+
+    def get_readonly_fields(self, request, obj=None):
+        if not (fields := self.readonly_fields):
+            fields = super().get_readonly_fields(request, obj)
+        try:
+            return fields if obj else (set(fields) - set(self.add_fields))
+        except:
+            return fields
+
+class InfoModelAdmin(BaseModelAdmin):
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class UserInfoModelAdmin(InfoModelAdmin):
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
 class AvatarBaseListFilter(admin.SimpleListFilter):
     title = 'avatar'
     parameter_name = 'avatar__base__name'
@@ -21,7 +52,7 @@ class AvatarBaseListFilter(admin.SimpleListFilter):
             return queryset
 
 @admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
+class ProfileAdmin(InfoModelAdmin):
 
     def mood(self, obj):
         return str(obj.avatar.mood)
@@ -29,8 +60,11 @@ class ProfileAdmin(admin.ModelAdmin):
     def base_avatar(self, obj):
         return str(obj.avatar.base)
 
-    fields = ['expired']
-    list_display = ['user', 'personality', 'base_avatar', 'mood', 'expired']
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    fields = list_display = ['user', 'personality', 'base_avatar', 'mood', 'expired']
+    readonly_fields = ['user', 'personality', 'base_avatar', 'mood']
     list_filter = [AvatarBaseListFilter, 'avatar__mood', 'expired']
     search_fields = ['user__username', 'avatar__base__name', 'avatar__mood__name']
 
@@ -41,38 +75,39 @@ class ProfileAdmin(admin.ModelAdmin):
     actions = [expire_tokens]
 
 @admin.register(Adjective)
-class AdjectiveAdmin(admin.ModelAdmin):
+class AdjectiveAdmin(BaseModelAdmin):
 
-    fields = ['name', 'trait', 'intensity', 'description']
-    list_display = ['name', 'trait', 'intensity', 'description']
+    fields = list_display = ['name', 'trait', 'intensity', 'description']
     list_filter = ['trait']
     search_fields = ['name', 'description']
 
 @admin.register(PersonalityQuestionnaire)
-class PersonalityQuestionnaireAdmin(admin.ModelAdmin):
+class PersonalityQuestionnaireAdmin(InfoModelAdmin):
 
-    fields = ['user']
-    list_display = ['user', 'create_time', 'submitted', 'submit_time']
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    readonly_fields = ['create_time', 'submitted', 'submit_time']
+    add_fields = ['user']
+    fields = list_display = add_fields + readonly_fields
     list_filter = ['submitted', 'user']
     search_fields = ['user__username']
     date_hierarchy = 'create_time'
-    show_full_result_count = True
-    empty_value_display = '<em>-NA-</em>'
 
 @admin.register(Interest)
-class InterestAdmin(admin.ModelAdmin):
+class InterestAdmin(BaseModelAdmin):
 
     search_fields = ['name']
 
 @admin.register(UserInterest)
-class UserInterestAdmin(admin.ModelAdmin):
+class UserInterestAdmin(UserInfoModelAdmin):
 
     list_display = ['user', 'interest', 'amount']
     list_filter = ['interest', 'amount', 'user']
     search_fields = ['user__username', 'interest__name']
 
 @admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
+class QuestionAdmin(BaseModelAdmin):
 
     def question(self, obj):
         return obj.text
@@ -96,7 +131,7 @@ class QuestionTextListFilter(admin.SimpleListFilter):
             return queryset
 
 @admin.register(Answer)
-class AnswerAdmin(admin.ModelAdmin):
+class AnswerAdmin(UserInfoModelAdmin):
 
     def user(self, obj):
         return str(obj.user_interest.user)
@@ -117,7 +152,7 @@ class AnswerAdmin(admin.ModelAdmin):
     search_fields = ['user_interest__user__username', 'user_interest__interest__name', 'question__text', 'text']
 
 @admin.register(AvatarBase)
-class AvatarBaseAdmin(admin.ModelAdmin):
+class AvatarBaseAdmin(BaseModelAdmin):
 
     def link(self, obj):
         return format_html(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
@@ -126,12 +161,12 @@ class AvatarBaseAdmin(admin.ModelAdmin):
     search_fields = ['name', 'url']
 
 @admin.register(Mood)
-class MoodAdmin(admin.ModelAdmin):
+class MoodAdmin(BaseModelAdmin):
 
     search_fields = ['name']
 
 @admin.register(Avatar)
-class AvatarAdmin(admin.ModelAdmin):
+class AvatarAdmin(BaseModelAdmin):
 
     def link(self, obj):
         return format_html(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
@@ -141,31 +176,33 @@ class AvatarAdmin(admin.ModelAdmin):
     search_fields = ['base__name', 'mood__name', 'url']
 
 @admin.register(Access)
-class AccessAdmin(admin.ModelAdmin):
-
-    fields = ['me', 'other', 'active']
-    list_display = ['id', 'me', 'other', 'create_time', 'active', 'viewed', 'view_time', 'requested', 'request_time', 'connected', 'connect_time']
-    list_filter = ['active', 'viewed', 'requested', 'connected', 'me', 'other']
-    search_fields = ['me__user__username', 'other__user__username', 'create_time', 'view_time', 'request_time', 'connect_time']
-    date_hierarchy = 'create_time'
+class AccessAdmin(InfoModelAdmin):
 
     def expire_access(self, request, queryset):
         queryset.update(active=False)
     expire_access.short_description = 'Expire accesses'
 
+    readonly_fields = ['id', 'me', 'other', 'create_time', 'viewed', 'view_time', 'requested', 'request_time', 'connected', 'connect_time']
+    fields = ['active'] + readonly_fields
+    list_display = readonly_fields + ['active']
+    add_fields = ['me', 'other', 'active']
+    list_filter = ['active', 'viewed', 'requested', 'connected', 'me', 'other']
+    search_fields = ['me__user__username', 'other__user__username', 'create_time', 'view_time', 'request_time', 'connect_time']
+    date_hierarchy = 'create_time'
     actions = [expire_access]
 
 @admin.register(Connect)
-class ConnectAdmin(admin.ModelAdmin):
-
-    fields = ['user1', 'user2', 'active']
-    list_display = ['id', 'user1', 'user2', 'create_time', 'active', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
-    list_filter = ['active', 'retained1', 'retained2', 'user1', 'user2']
-    search_fields = ['user1__user__username', 'user2__user__username', 'create_time', 'retain1_time', 'retain2_time', 'retain_time']
-    date_hierarchy = 'create_time'
+class ConnectAdmin(InfoModelAdmin):
 
     def expire_connect(self, request, queryset):
         queryset.update(active=False)
     expire_connect.short_description = 'Expire connects'
 
+    readonly_fields = ['id', 'user1', 'user2', 'create_time', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
+    fields = ['active'] + readonly_fields
+    list_display = readonly_fields + ['active']
+    add_fields = ['user1', 'user2', 'active']
+    list_filter = ['active', 'retained1', 'retained2', 'user1', 'user2']
+    search_fields = ['user1__user__username', 'user2__user__username', 'create_time', 'retain1_time', 'retain2_time', 'retain_time']
+    date_hierarchy = 'create_time'
     actions = [expire_connect]
