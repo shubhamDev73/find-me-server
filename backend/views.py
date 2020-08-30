@@ -4,17 +4,19 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from .decorators import auth
+from .decorators import auth_exempt
 from .models import *
 
 
 MAX_PROFILE_VIEWS = 0
 
 @require_GET
+@auth_exempt
 def index(request):
     return {"message": "API root node"}
 
 @require_POST
+@auth_exempt
 def register(request):
     token = None
     error = ''
@@ -32,6 +34,7 @@ def register(request):
     return {'token': token, 'error': error}
 
 @require_POST
+@auth_exempt
 def login(request):
     token = None
     error = ''
@@ -46,23 +49,19 @@ def login(request):
     return {'token': token, 'error': error}
 
 @require_POST
-@auth
 def logout(request):
     request.profile.expired = True
     request.profile.save()
 
 @require_GET
-@auth
 def me(request):
     return request.profile.get_info()
 
 @require_GET
-@auth
 def personality(request):
     return request.profile.traits
 
 @require_http_methods(["GET", "POST"])
-@auth
 def personality_update(request):
     if request.method == "GET":
         try:
@@ -87,17 +86,14 @@ def personality_update(request):
             return {'error': 'Questionnaire not found.', 'code': 404}
 
 @require_GET
-@auth
 def me_interests(request):
     return request.profile.get_all_interests()
 
 @require_GET
-@auth
 def me_interest(request, pk):
     return request.profile.get_interest(pk)
 
 @require_POST
-@auth
 def update_interests(request):
     for data in request.data:
         try:
@@ -114,7 +110,6 @@ def update_interests(request):
             user_interest.save()
 
 @require_POST
-@auth
 def update_interest(request, pk):
     try:
         user_interest = UserInterest.objects.get(user=request.profile, interest=pk)
@@ -138,7 +133,6 @@ def update_interest(request, pk):
         return {'error': 'Question not found.', 'code': 404}
 
 @require_GET
-@auth
 def me_avatar(request):
     return {
         "url": request.profile.avatar.url,
@@ -153,7 +147,6 @@ def me_avatar(request):
     }
 
 @require_POST
-@auth
 def me_avatar_update(request):
     try:
         avatar = Avatar.objects.get(pk=request.data['id'])
@@ -163,12 +156,10 @@ def me_avatar_update(request):
         return {'error': 'Avatar not found.', 'code': 404}
 
 @require_GET
-@auth
 def interests(request):
     return [{"id": interest.id, "name": interest.name} for interest in Interest.objects.all()]
 
 @require_GET
-@auth
 def interest(request, pk):
     try:
         interest = Interest.objects.get(pk=pk)
@@ -177,12 +168,10 @@ def interest(request, pk):
         return {'error': 'Interest not found.', 'code': 404}
 
 @require_GET
-@auth
 def base_avatars(request):
     return [{"id": base.id, "name": base.name, "url": base.url} for base in AvatarBase.objects.all()]
 
 @require_GET
-@auth
 def avatars(request, pk):
     try:
         base = AvatarBase.objects.get(pk=pk)
@@ -191,7 +180,6 @@ def avatars(request, pk):
         return {'error': 'Avatar not found.', 'code': 404}
 
 @require_GET
-@auth
 def find(request):
     return {
         "users": [{**access.other.get_partial_info(), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(me=request.profile)],
@@ -199,7 +187,6 @@ def find(request):
     }
 
 @require_GET
-@auth
 def find_view(request, pk):
     try:
         access = Access.objects.get(pk=pk)
@@ -215,7 +202,6 @@ def find_view(request, pk):
     return {'error': 'User not found.', 'code': 404}
 
 @require_POST
-@auth
 def request(request):
     try:
         access = Access.objects.get(pk=request.data['id'])
@@ -230,12 +216,10 @@ def request(request):
     return {'error': 'User not found.', 'code': 404}
 
 @require_GET
-@auth
 def views(request):
     return [{**access.me.get_info(interest_answers=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(viewed=True).filter(requested=False)]
 
 @require_GET
-@auth
 def view_view(request, pk):
     try:
         access = Access.objects.get(pk=pk)
@@ -246,12 +230,10 @@ def view_view(request, pk):
     return {'error': 'User not found.', 'code': 404}
 
 @require_GET
-@auth
 def requests(request):
     return [{**access.me.get_info(interest_answers=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
 
 @require_GET
-@auth
 def request_view(request, pk):
     try:
         access = Access.objects.get(pk=pk)
@@ -262,7 +244,6 @@ def request_view(request, pk):
     return {'error': 'User not found.', 'code': 404}
 
 @require_POST
-@auth
 def accept(request):
     try:
         access = Access.objects.get(pk=request.data['id'])
@@ -277,7 +258,6 @@ def accept(request):
     return {'error': 'Request not found.', 'code': 404}
 
 @require_GET
-@auth
 def found(request):
     connects = [(connect.user2, connect.id, connect.retained1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
     connects += [(connect.user1, connect.id, connect.retained2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
@@ -288,7 +268,6 @@ def found(request):
     }} for profile, id, retain_request, retained in connects]
 
 @require_GET
-@auth
 def found_view(request, pk):
     try:
         connect = Connect.objects.get(pk=pk)
@@ -302,7 +281,6 @@ def found_view(request, pk):
     return {'error': 'User not found.', 'code': 404}
 
 @require_POST
-@auth
 def retain(request):
     try:
         connect = Connect.objects.get(active=True, pk=request.data['id'])

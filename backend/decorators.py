@@ -1,12 +1,8 @@
-def auth(function):
+from functools import wraps
 
-    def wrap(request, *args, **kwargs):
-        if request.profile is not None:
-            if response := function(request, *args, **kwargs):
-                return response
-            return {}
-        return {'error': request.auth_error, 'code': request.auth_error_status_code}
+def auth_exempt(function):
 
-    wrap.__doc__ = function.__doc__
-    wrap.__name__ = function.__name__
-    return wrap
+    def wrap(*args, **kwargs):
+        return function(*args, **kwargs)
+    wrap.auth_exempt = True
+    return wraps(function)(wrap)
