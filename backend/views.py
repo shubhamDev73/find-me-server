@@ -101,10 +101,14 @@ def me_interest(request, pk):
 def update_interests(request):
     for data in request.data:
         try:
-            user_interest = UserInterest.objects.get(user=request.profile, interest=data['interest'])
-            user_interest.amount = data['amount']
-        except UserInterest.DoesNotExist:
-            user_interest = UserInterest.objects.create(user=request.profile, **data) if data['amount'] else None
+            interest = Interest.objects.get(pk=data['interest'])
+            try:
+                user_interest = UserInterest.objects.get(user=request.profile, interest=interest)
+                user_interest.amount = data['amount']
+            except UserInterest.DoesNotExist:
+                user_interest = UserInterest.objects.create(user=request.profile, interest=interest, amount=data['amount']) if data['amount'] else None
+        except Interest.DoesNotExist:
+            return {'error': 'Interest not found.', 'code': 404}
 
         if user_interest:
             user_interest.save()
