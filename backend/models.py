@@ -71,6 +71,10 @@ class Profile(models.Model):
         self.save()
         return self
 
+    def personality_representation(self, personality, indices):
+        elements = Personality.objects.order_by('trait')
+        return {elements[index].display_name: personality[index] for index in indices}
+
     @property
     def facets(self):
         facets = [float(f"0.{self._personality[i * FLOAT_PRECISION : (i + 1) * FLOAT_PRECISION]}") for i in range(NUM_FACETS)]
@@ -81,13 +85,13 @@ class Profile(models.Model):
 
     @property
     def personality(self):
-        return personality_representation(self.get_personality(), range(NUM_TRAITS))
+        return self.personality_representation(self.get_personality(), range(NUM_TRAITS))
 
     @property
     def major_personality(self):
         personality = self.get_personality()
         indices = np.flip(abs(personality).argsort())[:NUM_DOMINANT_TRAITS]
-        return personality_representation(personality, indices)
+        return self.personality_representation(personality, indices)
 
     def save_facets(self, facets):
         self._personality = ''.join((f"%0.{FLOAT_PRECISION}f" % facets[i])[2:] if facets[i] < 1 else "9" * FLOAT_PRECISION for i in range(NUM_FACETS))
