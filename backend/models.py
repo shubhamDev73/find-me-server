@@ -188,18 +188,18 @@ class Profile(models.Model):
 class Adjective(models.Model):
 
     TraitChoices = [
-        (Personality.earth.value, 'Earth'),
-        (Personality.fire.value, 'Fire'),
-        (Personality.water.value, 'Water'),
-        (Personality.space.value, 'Space'),
-        (Personality.air.value, 'Air'),
+        (Trait.E.value, 'E'),
+        (Trait.N.value, 'N'),
+        (Trait.A.value, 'A'),
+        (Trait.C.value, 'C'),
+        (Trait.O.value, 'O'),
     ]
 
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=40)
     trait = models.IntegerField(choices=TraitChoices)
     facet = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(6)])
     pool = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(4)])
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
