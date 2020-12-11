@@ -231,7 +231,7 @@ def view_view(request, pk):
 
 @require_GET
 def requests(request):
-    return [{**access.me.get_info(interest_answers=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
+    return [{**access.me.get_basic_info(), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
 
 @require_GET
 def request_view(request, pk):
@@ -261,7 +261,7 @@ def accept(request):
 def found(request):
     connects = [(1, connect.user2, connect.id, connect.retained1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
     connects += [(2, connect.user1, connect.id, connect.retained2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
-    return [{**profile.get_info(interest_answers=False), **{
+    return [{**profile.get_basic_info(), **{
         "id": id,
         "me": me,
         "retain_request_sent": retain_request,

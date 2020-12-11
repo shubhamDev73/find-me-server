@@ -128,6 +128,12 @@ class Profile(models.Model):
             "mood": self.avatar.mood.name,
         }
 
+    def get_basic_info(self):
+        return {
+            "nick": self.user.username,
+            "avatar": self.avatar.url,
+        }
+
     def get_partial_info(self):
         return {
             "avatar": self.avatar.url,
