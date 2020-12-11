@@ -77,7 +77,11 @@ class ProfileAdmin(InfoModelAdmin):
 @admin.register(Personality)
 class PersonalityAdmin(BaseModelAdmin):
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
     fields = list_display = ['trait', 'display_name', 'description']
+    readonly_fields = ['trait', 'display_name']
     list_filter = ['trait', 'display_name']
     search_fields = fields
 
