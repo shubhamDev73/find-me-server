@@ -182,7 +182,7 @@ def avatars(request, pk):
 @require_GET
 def find(request):
     return {
-        "users": [{**access.other.get_partial_info(), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(me=request.profile)],
+        "users": [{**access.other.get_partial_info(), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(me=request.profile).filter(connected=False)],
         "views-remaining": MAX_PROFILE_VIEWS - Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count(),
     }
 
