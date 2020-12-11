@@ -77,8 +77,8 @@ class ProfileAdmin(InfoModelAdmin):
 @admin.register(Adjective)
 class AdjectiveAdmin(BaseModelAdmin):
 
-    fields = list_display = ['name', 'trait', 'intensity', 'description']
-    list_filter = ['trait']
+    fields = list_display = ['name', 'trait', 'facet', 'pool', 'description']
+    list_filter = ['trait', 'facet', 'pool']
     search_fields = ['name', 'description']
 
 @admin.register(PersonalityQuestionnaire)

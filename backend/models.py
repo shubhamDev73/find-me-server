@@ -4,6 +4,7 @@ import numpy as np
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from algo.parameters import *
 
@@ -146,16 +147,36 @@ class Profile(models.Model):
 
     @property
     def traits(self):
-        personality = self.get_personality()
+        import random
+
+        facets = self.facets
         traits = {}
-        for index, value in enumerate(personality):
-            trait = Personality(index)
+
+        def find_index(element, array):
+            for index, value in enumerate(array):
+                if value > element:
+                    return index
+            return -1
+
+        for i in range(NUM_TRAITS):
+            trait = Personality(i)
             adjs = Adjective.objects.filter(trait=trait)
-            if value > 0:
-                adjs = adjs.filter(intensity__range=(0, value))
-            else:
-                adjs = adjs.filter(intensity__range=(value, 0))
-            traits[trait.name] = {"value": value, "adjectives": [{"name": adj.name, "description": adj.description} for adj in adjs]}
+            adjectives = list()
+            pool = FACET_POOLS[trait]
+            trait_value = 0
+            for j in range(FACETS_PER_TRAIT):
+                facet_value = facets[i * FACETS_PER_TRAIT + j]
+                trait_value += facet_value
+                index = find_index(facet_value, pool[j + 1])
+                facet_adjs = adjs.filter(facet=j+1).filter(pool=index)
+                try:
+                    adjectives.extend(random.choices(facet_adjs))
+                except:
+                    pass
+            traits[trait.name] = {
+                "value": trait_value / FACETS_PER_TRAIT,
+                "adjectives": [{"name": adjective.name, "description": adjective.description} for adjective in adjectives]
+            }
         return traits
 
 class Adjective(models.Model):
@@ -170,7 +191,8 @@ class Adjective(models.Model):
 
     name = models.CharField(max_length=20)
     trait = models.IntegerField(choices=TraitChoices)
-    intensity = models.FloatField()
+    facet = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(6)])
+    pool = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(4)])
     description = models.TextField()
 
     def __str__(self):
