@@ -74,6 +74,13 @@ class ProfileAdmin(InfoModelAdmin):
 
     actions = [expire_tokens]
 
+@admin.register(Personality)
+class PersonalityAdmin(BaseModelAdmin):
+
+    fields = list_display = ['trait', 'display_name', 'description']
+    list_filter = ['trait', 'display_name']
+    search_fields = fields
+
 @admin.register(Adjective)
 class AdjectiveAdmin(BaseModelAdmin):
 

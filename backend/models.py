@@ -165,10 +165,10 @@ class Profile(models.Model):
             return -1
 
         for i in range(NUM_TRAITS):
-            trait = Personality(i)
-            adjs = Adjective.objects.filter(trait=trait)
+            trait = Personality.objects.get(trait=i)
+            adjs = Adjective.objects.filter(trait=i)
             adjectives = list()
-            pool = FACET_POOLS[trait]
+            pool = FACET_POOLS[Trait(i)]
             trait_value = 0
             for j in range(FACETS_PER_TRAIT):
                 facet_value = facets[i * FACETS_PER_TRAIT + j]
@@ -179,11 +179,32 @@ class Profile(models.Model):
                     adjectives.extend(random.choices(facet_adjs))
                 except:
                     pass
-            traits[trait.name] = {
+            traits[trait.display_name] = {
                 "value": trait_value / FACETS_PER_TRAIT,
+                "description": trait.description,
                 "adjectives": [{"name": adjective.name, "description": adjective.description} for adjective in adjectives]
             }
         return traits
+
+class Personality(models.Model):
+
+    class Meta:
+        verbose_name_plural = "personalities"
+
+    TraitChoices = [
+        (Trait.E.value, 'E'),
+        (Trait.N.value, 'N'),
+        (Trait.A.value, 'A'),
+        (Trait.C.value, 'C'),
+        (Trait.O.value, 'O'),
+    ]
+
+    trait = models.IntegerField(unique=True, choices=TraitChoices)
+    display_name = models.CharField(max_length=20)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.display_name
 
 class Adjective(models.Model):
 
