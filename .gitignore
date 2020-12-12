@@ -3,3 +3,5 @@ __pycache__/
 django-key.txt
 models/*
 media/**
+*.pickle
+credentials.json
