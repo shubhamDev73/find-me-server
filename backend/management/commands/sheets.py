@@ -42,12 +42,15 @@ class Command(GoogleCommand):
             unique_value = obj_dict.get(unique_field)
 
             try:
-                obj = Adjective.objects.get(**{unique_field: unique_value})
-                for field in obj_dict:
-                    setattr(obj, field, obj_dict[field])
-                self.stdout.write(self.style.SUCCESS(f"Updating {unique_value}"))
-            except Adjective.DoesNotExist:
-                obj = Adjective.objects.create(**obj_dict)
-                self.stdout.write(self.style.SUCCESS(f"Creating {unique_value}"))
+                try:
+                    obj = Adjective.objects.get(**{unique_field: unique_value})
+                    for field in obj_dict:
+                        setattr(obj, field, obj_dict[field])
+                    self.stdout.write(self.style.SUCCESS(f"Updating: {unique_value}"))
+                except Adjective.DoesNotExist:
+                    obj = Adjective.objects.create(**obj_dict)
+                    self.stdout.write(self.style.SUCCESS(f"Creating: {unique_value}"))
 
-            obj.save()
+                obj.save()
+            except:
+                self.stdout.write(self.style.ERROR(f"Error in: {unique_value}"))
