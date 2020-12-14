@@ -73,7 +73,7 @@ class Profile(models.Model):
 
     def personality_representation(self, personality, indices):
         elements = Personality.objects.order_by('trait')
-        return {elements[index].display_name: personality[index] for index in indices}
+        return {elements[int(index)].display_name: personality[int(index)] for index in indices}
 
     @property
     def facets(self):

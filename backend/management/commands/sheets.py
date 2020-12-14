@@ -1,5 +1,4 @@
 from django.core.management.base import CommandError
-from django.conf import settings
 
 from backend.management.commands import GoogleCommand
 from backend.models import Adjective

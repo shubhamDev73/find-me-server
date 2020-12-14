@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
