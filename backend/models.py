@@ -98,7 +98,13 @@ class Profile(models.Model):
         self.save()
         return self
 
-    def get_all_interests(self, answers=True):
+    def get_all_interests(self, questions=True, blank=True):
+        def get_answer(user_interest, question):
+            try:
+                return Answer.objects.get(user_interest=user_interest, question=question).text
+            except Answer.DoesNotExist:
+                return ''
+
         return [{
             **{
                 "id": user_interest.interest.id,
@@ -106,10 +112,10 @@ class Profile(models.Model):
                 "amount": user_interest.amount,
             },
             **({
-                "answers": [
-                    {"question": answer.question.text, "answer": answer.text} for answer in Answer.objects.filter(user_interest=user_interest)
-                ]
-            } if answers else {})
+                "questions": sorted(filter(lambda question: blank or question['answer'] != '', [
+                    {"id": question.id, "question": question.text, "answer": get_answer(user_interest, question)} for question in Question.objects.filter(interest=user_interest.interest)
+                ]), key=lambda question : len(question['answer']), reverse=True)
+            } if questions else {})
         } for user_interest in UserInterest.objects.filter(user=self)]
 
     def get_interest(self, pk):
@@ -123,12 +129,12 @@ class Profile(models.Model):
         except UserInterest.DoesNotExist:
             return {'error': 'Interest not found.', 'code': 404}
 
-    def get_info(self, interest_answers=True):
+    def get_info(self, interest_questions=True):
         return {
             "nick": self.user.username,
             "avatar": self.avatar.url,
             "personality": self.personality,
-            "interests": self.get_all_interests(interest_answers),
+            "interests": self.get_all_interests(interest_questions),
             "mood": self.avatar.mood.name,
         }
 
@@ -147,7 +153,7 @@ class Profile(models.Model):
 
     @property
     def interests(self):
-        all_interests = self.get_all_interests(answers=False)
+        all_interests = self.get_all_interests(questions=False)
         vector = np.zeros(Interest.objects.last().pk, dtype=float)
         for interest in all_interests:
             vector.itemset(interest['id'] - 1, interest['amount'])

@@ -26,7 +26,7 @@
 				</ul>
 				<h4>/interests/</h4>
 				<ul>
-					<li>/ : retrieve information about my interests. [ {"id", "name", "amount", "answers": [ {"question", "answer"} ] } ].</li>
+					<li>/ : retrieve information about my interests. [ {"id", "name", "amount", "questions": [ {"id", "question", "answer"} ] } ].</li>
 					<li>/update/ : (POST) update my interests. data: [ {"interest": &lt;interest-id&gt;, "amount": 2} ]. setting amount to zero will remove that interest.</li>
 					<li>/&lt;interest-id&gt;/ : retrieve answers about my specific interest.</li>
 					<li>/&lt;interest-id&gt;/update/ : (POST) update answers about my interest. data: [ {"question": &lt;question-id&gt;, "answer": "answer text"} ]. empty answer string deletes that answer.</li>
