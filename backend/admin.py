@@ -81,7 +81,7 @@ class PersonalityAdmin(BaseModelAdmin):
         return False
 
     fields = list_display = ['trait', 'display_name', 'description']
-    readonly_fields = ['trait', 'display_name']
+    readonly_fields = ['trait']
     list_filter = ['trait', 'display_name']
     search_fields = fields
 
