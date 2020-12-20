@@ -175,6 +175,7 @@ class Profile(models.Model):
             return -1
 
         for i in range(NUM_TRAITS):
+            personality = self.personality
             trait = Personality.objects.get(trait=i)
             adjs = Adjective.objects.filter(trait=i)
             adjectives = list()
@@ -190,7 +191,7 @@ class Profile(models.Model):
                 except:
                     pass
             traits[trait.display_name] = {
-                "value": trait_value / FACETS_PER_TRAIT,
+                "value": personality[trait.display_name],
                 "description": trait.description,
                 "adjectives": [{"name": adjective.name, "description": adjective.description} for adjective in adjectives]
             }
