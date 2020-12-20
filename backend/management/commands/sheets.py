@@ -14,6 +14,8 @@ class Command(GoogleCommand):
 
     def handle(self, *args, **kwargs):
 
+        Adjective.objects.all().delete()
+
         self.insert_data({
             'name': 0,
             'trait': lambda row: Trait[row[1]],
