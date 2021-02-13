@@ -133,7 +133,7 @@ class Profile(models.Model):
         return {
             "nick": self.user.username,
             "avatar": self.avatar.url,
-            "personality": self.personality,
+            "personality": self.traits,
             "interests": self.get_all_interests(interest_questions),
             "mood": self.avatar.mood.name,
         }
