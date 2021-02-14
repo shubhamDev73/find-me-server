@@ -169,7 +169,12 @@ def interests(request):
     return [{
         "id": interest.id,
         "name": interest.name,
-        "amount": find_amount(interest)
+        "amount": find_amount(interest),
+        "questions": [{
+            "id": question.id,
+            "question": question.text,
+            "answer": ""
+        } for question in Question.objects.filter(interest=interest)],
     } for interest in Interest.objects.all()]
 
 @require_GET
