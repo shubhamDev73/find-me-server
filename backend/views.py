@@ -277,14 +277,15 @@ def accept(request):
 
 @require_GET
 def found(request):
-    connects = [(1, connect.user2, connect.id, connect.retained1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
-    connects += [(2, connect.user1, connect.id, connect.retained2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
+    connects = [(connect.id, connect.chat_id, 1, connect.retained1, connect.user2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
+    connects += [(connect.id, connect.chat_id, 2, connect.retained2, connect.user1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
     return [{**profile.get_basic_info(), **{
         "id": id,
         "me": me,
+        "chat_id": chat_id,
         "retain_request_sent": retain_request,
         "retained": retained,
-    }} for me, profile, id, retain_request, retained in connects]
+    }} for id, chat_id, me, retain_request, profile, retained in connects]
 
 @require_GET
 def found_view(request, pk):

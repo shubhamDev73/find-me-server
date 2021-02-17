@@ -299,6 +299,7 @@ class Connect(models.Model):
     user1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='first_user')
     user2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='second_user')
     create_time = models.DateTimeField(auto_now_add=True)
+    chat_id = models.CharField(max_length=30)
     active = models.BooleanField(default=True)
 
     retained1 = models.BooleanField(default=False)
