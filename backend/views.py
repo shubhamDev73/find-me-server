@@ -293,9 +293,9 @@ def found_view(request, pk):
         connect = Connect.objects.get(pk=pk)
         if connect.active:
             if connect.user1 == request.profile:
-                return {'me': 1, 'other': connect.user2.get_info()}
+                return connect.user2.get_info()
             if connect.user2 == request.profile:
-                return {'me': 2, 'other': connect.user1.get_info()}
+                return connect.user1.get_info()
     except Connect.DoesNotExist:
         pass
     return {'error': 'User not found.', 'code': 404}
