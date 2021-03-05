@@ -172,7 +172,7 @@ class Profile(models.Model):
             for index, value in enumerate(array):
                 if value > element:
                     return index
-            return -1
+            return len(array)
 
         for i in range(NUM_TRAITS):
             personality = self.personality
@@ -185,7 +185,7 @@ class Profile(models.Model):
                 facet_value = facets[i * FACETS_PER_TRAIT + j]
                 trait_value += facet_value
                 index = find_index(facet_value, pool[j + 1])
-                facet_adjs = adjs.filter(facet=j+1).filter(pool=index)
+                facet_adjs = adjs.filter(facet=j+1).filter(pool=index+1)
                 try:
                     adjectives.extend(random.choices(facet_adjs))
                 except:
