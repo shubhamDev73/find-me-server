@@ -14,8 +14,16 @@ FLOAT_PRECISION = 4
 def avatar_base_path(instance, filename):
     return f'avatars/{instance.name.lower()}/{filename}'
 
-def avatar_path(instance, filename):
-    return f'avatars/{instance.base.name.lower()}/{instance.mood.name.lower()}/{filename}'
+def avatar_path(instance, filename, variant='v1'):
+    base_name = instance.base.name.lower()
+    mood_name = instance.mood.name.lower()
+    return f'avatars/{base_name}/{mood_name}/{base_name}_{mood_name}_{variant}.{filename.rsplit(".", 1)[1]}'
+
+def avatar_path_v1(instance, filename):
+    return avatar_path(instance, filename, 'v1')
+
+def avatar_path_v2(instance, filename):
+    return avatar_path(instance, filename, 'v2')
 
 class AvatarBase(models.Model):
     name = models.CharField(max_length=20)
@@ -37,11 +45,19 @@ class Mood(models.Model):
 class Avatar(models.Model):
     base = models.ForeignKey(AvatarBase, on_delete=models.CASCADE)
     mood = models.ForeignKey(Mood, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=avatar_path)
+    v1 = models.ImageField(upload_to=avatar_path_v1, blank=True, null=True)
+    v2 = models.ImageField(upload_to=avatar_path_v2, blank=True, null=True)
+
+    def get_url(self, variant='v1'):
+        try:
+            url = f"http://{settings.HOST}{getattr(self, variant).url}"
+        except:
+            url = ""
+        return url
 
     @property
     def url(self):
-        return f"http://{settings.HOST}{self.image.url}"
+        return {variant: self.get_url(variant) for variant in ["v1", "v2"]}
 
     def __str__(self):
         return f"{str(self.base)} ({str(self.mood)})"

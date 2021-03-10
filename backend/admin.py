@@ -179,12 +179,17 @@ class MoodAdmin(BaseModelAdmin):
 @admin.register(Avatar)
 class AvatarAdmin(BaseModelAdmin):
 
-    def link(self, obj):
-        return format_html(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
+    def link(self, obj, variant):
+        return format_html(f'<a href="{obj.get_url(variant)}" target="_blank">{obj.get_url(variant)}</a>')
 
-    list_display = ['base', 'mood', 'link']
+    def v1(self, obj):
+        return self.link(obj, 'v1')
+    def v2(self, obj):
+        return self.link(obj, 'v2')
+
+    list_display = ['base', 'mood', 'v1', 'v2']
     list_filter = ['base__name', 'mood']
-    search_fields = ['base__name', 'mood__name', 'url']
+    search_fields = ['base__name', 'mood__name']
 
 @admin.register(Access)
 class AccessAdmin(InfoModelAdmin):
