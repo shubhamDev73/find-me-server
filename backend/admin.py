@@ -80,10 +80,13 @@ class PersonalityAdmin(BaseModelAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
-    fields = list_display = ['trait', 'display_name', 'description']
+    def link(self, obj):
+        return format_html(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
+
+    list_display = ['trait', 'display_name', 'description', 'link']
     readonly_fields = ['trait']
     list_filter = ['trait', 'display_name']
-    search_fields = fields
+    search_fields = ['trait', 'display_name', 'description']
 
 @admin.register(Adjective)
 class AdjectiveAdmin(BaseModelAdmin):

@@ -209,6 +209,7 @@ class Profile(models.Model):
             traits[trait.display_name] = {
                 "value": personality[trait.display_name],
                 "description": trait.description,
+                "url": trait.url,
                 "adjectives": [{"name": adjective.name, "description": adjective.description} for adjective in adjectives]
             }
         return traits
@@ -229,6 +230,7 @@ class Personality(models.Model):
     trait = models.IntegerField(unique=True, choices=TraitChoices)
     display_name = models.CharField(max_length=20)
     description = models.TextField(blank=True)
+    url = models.TextField(blank=True)
 
     def __str__(self):
         return self.display_name
