@@ -10,14 +10,20 @@ from algo.parameters import *
 
 FLOAT_PRECISION = 4
 
+def unique_name(name):
+    full_name = os.path.join(settings.MEDIA_ROOT, name)
+    if os.path.exists(full_name):
+        os.remove(full_name)
+    return name
 
 def avatar_base_path(instance, filename):
-    return f'avatars/{instance.name.lower()}/{filename}'
+    base_name = instance.name.lower()
+    return unique_name(f'avatars/{base_name}/{base_name}.{filename.rsplit(".", 1)[1]}')
 
 def avatar_path(instance, filename, variant='v1'):
     base_name = instance.base.name.lower()
     mood_name = instance.mood.name.lower()
-    return f'avatars/{base_name}/{mood_name}/{base_name}_{mood_name}_{variant}.{filename.rsplit(".", 1)[1]}'
+    return unique_name(f'avatars/{base_name}/{mood_name}/{base_name}_{mood_name}_{variant}.{filename.rsplit(".", 1)[1]}')
 
 def avatar_path_v1(instance, filename):
     return avatar_path(instance, filename, 'v1')
