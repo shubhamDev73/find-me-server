@@ -7,8 +7,23 @@ from django.views.decorators.http import require_GET, require_POST, require_http
 from .decorators import auth_exempt
 from .models import *
 
+from algo.parameters import *
+
 
 MAX_PROFILE_VIEWS = 0
+NEW_QUESTIONNAIRE_WEIGHT = 0.65
+QUESTION_FACETS = {
+    "Make friends easily.": (Trait.E, 1),
+    "Spend time reflecting on things.": (Trait.O, 1),
+    "Feel comfortable with myself.": (Trait.N, -3),
+    "Make people feel welcome.": (Trait.A, 3),
+    "Remain calm under pressure.": (Trait.N, -6),
+    "Am willing to try anything once.": (Trait.E, 5),
+    "Believe that there is no absolute right and wrong.": (Trait.O, 6),
+    "Need a push to get started.": (Trait.C, -5),
+    "Do just enough work to get by.": (Trait.C, -4),
+    "Value cooperation over competition.": (Trait.A, 6),
+}
 
 @require_GET
 @auth_exempt
@@ -62,28 +77,31 @@ def personality(request):
     return request.profile.traits
 
 @require_http_methods(["GET", "POST"])
+@auth_exempt
 def personality_update(request):
     if request.method == "GET":
-        try:
-            questionnaire = PersonalityQuestionnaire.objects.get(user=request.profile, submitted=False)
-        except PersonalityQuestionnaire.DoesNotExist:
-            questionnaire = PersonalityQuestionnaire.objects.create(user=request.profile)
-        return {
-            "id": questionnaire.id,
-            "questions": ["How extrovert are you?", "How depressed are you?"], # dummy data
-        }
+        return {'url': 'https://tripetto.app/run/YK2S455EX3'}
     else:
         try:
-            questionnaire = PersonalityQuestionnaire.objects.get(pk=request.data['id'])
-            if questionnaire.user != request.profile:
-                return {'error': 'Invalid questionnaire.'}
-            if questionnaire.submitted:
-                return {'error': 'Questionnaire already answered.'}
-            questionnaire.submitted = True
-            questionnaire.save()
-            # update user personality based on answers
-        except PersonalityQuestionnaire.DoesNotExist:
-            return {'error': 'Questionnaire not found.', 'code': 404}
+            nick = request.data.pop('FindMe Nick')
+            profile = Profile.objects.get(user__username=nick)
+        except Profile.DoesNotExist:
+            return {'error': 'Nick not found.'}
+
+        facets = [0 for _ in range(NUM_FACETS)]
+        for question in request.data:
+            if question[:8] != 'tripetto':
+                trait, facet = QUESTION_FACETS[question]
+                value = int(request.data[question]) / 5
+                if facet < 0:
+                    value = 1 - value
+                facets[trait.value * NUM_TRAITS + abs(facet) - 1] = value
+
+        prev_facets = profile.facets
+        for index, value in enumerate(facets):
+            if value != 0:
+                prev_facets[index] = value * NEW_QUESTIONNAIRE_WEIGHT + prev_facets[index] * (1 - NEW_QUESTIONNAIRE_WEIGHT)
+        profile.save_facets(prev_facets)
 
 @require_GET
 def me_interests(request):
