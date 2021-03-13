@@ -63,8 +63,8 @@ class ProfileAdmin(InfoModelAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
-    fields = list_display = ['user', 'personality', 'base_avatar', 'mood', 'expired']
-    readonly_fields = ['user', 'personality', 'base_avatar', 'mood']
+    fields = list_display = ['user', 'personality', 'last_questionnaire_time', 'base_avatar', 'mood', 'expired']
+    readonly_fields = ['user', 'personality', 'last_questionnaire_time', 'base_avatar', 'mood']
     list_filter = [AvatarBaseListFilter, 'avatar__mood', 'expired']
     search_fields = ['user__username', 'avatar__base__name', 'avatar__mood__name']
 

@@ -5,6 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils import timezone
 
 from algo.parameters import *
 
@@ -73,7 +74,8 @@ class Profile(models.Model):
     token = models.CharField(max_length=64)
     expired = models.BooleanField(default=False)
     avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
-    _personality = models.CharField(max_length=120, default='0' * NUM_FACETS * FLOAT_PRECISION)
+    _personality = models.CharField(max_length=NUM_FACETS * FLOAT_PRECISION, default='0' * NUM_FACETS * FLOAT_PRECISION)
+    last_questionnaire_time = models.DateTimeField(null=True)
 
     def __str__(self):
         return str(self.user)
@@ -117,6 +119,7 @@ class Profile(models.Model):
 
     def save_facets(self, facets):
         self._personality = ''.join((f"%0.{FLOAT_PRECISION}f" % facets[i])[2:] if facets[i] < 1 else "9" * FLOAT_PRECISION for i in range(NUM_FACETS))
+        self.last_questionnaire_time = timezone.now()
         self.save()
         return self
 

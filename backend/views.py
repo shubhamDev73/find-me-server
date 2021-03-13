@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django.utils import timezone
 
 from .decorators import auth_exempt
 from .models import *
@@ -11,7 +12,6 @@ from algo.parameters import *
 
 
 MAX_PROFILE_VIEWS = 0
-NEW_QUESTIONNAIRE_WEIGHT = 0.65
 QUESTION_FACETS = {
     "Make friends easily.": (Trait.E, 1),
     "Spend time reflecting on things.": (Trait.O, 1),
@@ -92,16 +92,36 @@ def personality_update(request):
         for question in request.data:
             if question[:8] != 'tripetto':
                 trait, facet = QUESTION_FACETS[question]
-                value = int(request.data[question]) / 5
+                value = (int(request.data[question]) / 5) * 0.998 + 0.001
                 if facet < 0:
                     value = 1 - value
-                facets[trait.value * NUM_TRAITS + abs(facet) - 1] = value
+                facets[trait.value * FACETS_PER_TRAIT + abs(facet) - 1] = value
 
-        prev_facets = profile.facets
-        for index, value in enumerate(facets):
-            if value != 0:
-                prev_facets[index] = value * NEW_QUESTIONNAIRE_WEIGHT + prev_facets[index] * (1 - NEW_QUESTIONNAIRE_WEIGHT)
-        profile.save_facets(prev_facets)
+        if profile.last_questionnaire_time is None:
+            profile.save_facets(facets)
+        else:
+            days = (timezone.now() - profile.last_questionnaire_time).days
+            if days < 1:
+                weight = 0.15
+            elif days < 7:
+                weight = 0.3
+            elif days < 14:
+                weight = 0.4
+            elif days < 30:
+                weight = 0.5
+            elif days < 60:
+                weight = 0.6
+            else:
+                weight = 0.75
+
+            prev_facets = profile.facets
+            for index, value in enumerate(facets):
+                if value != 0:
+                    if prev_facets[index] == 0:
+                        prev_facets[index] = value
+                    else:
+                        prev_facets[index] = value * weight + prev_facets[index] * (1 - weight)
+            profile.save_facets(prev_facets)
 
 @require_GET
 def me_interests(request):
