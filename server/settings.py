@@ -23,6 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 with open(os.path.join(BASE_DIR, 'django-key.txt')) as f:
     SECRET_KEY = f.read()
 GOOGLE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'credentials.json')
+FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, 'firebase_credentials.json')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

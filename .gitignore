@@ -4,4 +4,4 @@ django-key.txt
 models/*
 media/**
 *.pickle
-credentials.json
+*credentials.json

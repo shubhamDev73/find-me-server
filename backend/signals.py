@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 from .models import Profile, Connect
+from .firebase import create_new_chat
 
 
 def create_user_profile(sender, instance, created, **kwargs):
@@ -22,6 +23,12 @@ def delete_model(sender, instance, **kwargs):
 def delete_zero_interest(sender, instance, created, **kwargs):
     if not instance.amount:
         instance.delete()
+
+def create_firebase_chat(sender, instance, created, **kwargs):
+    if created:
+        chat_id = create_new_chat(instance.id)
+        instance.chat_id = chat_id
+        instance.save()
 
 class UpdateTime:
 
