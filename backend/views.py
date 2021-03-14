@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from .decorators import auth_exempt
 from .models import *
-from .firebase import get_last_message
+from .firebase import get_last_message, get_unread_num
 
 from algo.parameters import *
 
@@ -316,16 +316,33 @@ def accept(request):
 
 @require_GET
 def found(request):
-    connects = [(connect.id, connect.chat_id, 1, get_last_message(connect.chat_id), connect.retained1, connect.user2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
-    connects += [(connect.id, connect.chat_id, 2, get_last_message(connect.chat_id), connect.retained2, connect.user1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
+    connects = [(connect.id, connect.chat_id, 1, get_last_message(connect.chat_id), get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained1, connect.user2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
+    connects += [(connect.id, connect.chat_id, 2, get_last_message(connect.chat_id), get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained2, connect.user1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
     return [{**profile.get_basic_info(), **{
         "id": id,
         "me": me,
         "chat_id": chat_id,
         "last_message": last_message,
+        "unread_num": unread_num,
         "retain_request_sent": retain_request,
         "retained": retained,
-    }} for id, chat_id, me, last_message, retain_request, profile, retained in connects]
+    }} for id, chat_id, me, last_message, unread_num, retain_request, profile, retained in connects]
+
+@require_POST
+def found_read(request):
+    try:
+        connect = Connect.objects.get(active=True, pk=request.data['id'])
+        if connect.user1 == request.profile:
+            connect.last_read_time1 = timezone.now()
+            connect.save()
+            return
+        if connect.user2 == request.profile:
+            connect.last_read_time2 = timezone.now()
+            connect.save()
+            return
+    except Connect.DoesNotExist:
+        pass
+    return {'error': 'Connect not found.', 'code': 404}
 
 @require_GET
 def found_view(request, pk):

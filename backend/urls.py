@@ -61,6 +61,7 @@ urls_requests = [
 urls_found = [
     path('', views.found, name='index'),
     path('<int:pk>/', views.found_view, name='view'),
+    path('read/', views.found_read, name='read'),
     path('retain/', views.retain, name='retain'),
 ]
 

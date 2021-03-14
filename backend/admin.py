@@ -217,7 +217,7 @@ class ConnectAdmin(InfoModelAdmin):
         queryset.update(active=False)
     expire_connect.short_description = 'Expire connects'
 
-    readonly_fields = ['id', 'user1', 'user2', 'chat_id', 'create_time', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
+    readonly_fields = ['id', 'user1', 'user2', 'chat_id', 'create_time', 'last_read_time1', 'last_read_time2', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
     fields = ['active'] + readonly_fields
     list_display = readonly_fields + ['active']
     add_fields = ['user1', 'user2', 'active']

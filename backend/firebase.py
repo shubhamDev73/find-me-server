@@ -23,3 +23,13 @@ def get_last_message(chat_id):
 
     message = messages[0]
     return {"id": message.id, **message.to_dict()}
+
+def get_unread_num(chat_id, me, last_read_time):
+    db = firestore.client()
+    messages = db.collection('chats')\
+          .document(chat_id)\
+          .collection('chats')\
+          .where('user', '==', 3 - me)\
+          .where('timestamp', '>', last_read_time)\
+          .get()
+    return len(messages)
