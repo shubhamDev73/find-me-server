@@ -80,8 +80,11 @@ class PersonalityAdmin(BaseModelAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
+    def url_as_link(self, url):
+        return f'<a href="{url}" target="_blank">{url}</a>'
+
     def link(self, obj):
-        return format_html(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
+        return format_html(', '.join(self.url_as_link(url) for url in obj.get_urls()))
 
     list_display = ['trait', 'display_name', 'description', 'link']
     readonly_fields = ['trait']

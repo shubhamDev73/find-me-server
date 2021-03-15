@@ -218,7 +218,7 @@ class Profile(models.Model):
             traits[trait.display_name] = {
                 "value": personality[trait.display_name],
                 "description": trait.description,
-                "url": trait.url,
+                "url": trait.get_urls(),
                 "adjectives": [{"name": adjective.name, "description": adjective.description} for adjective in adjectives]
             }
         return traits
@@ -243,6 +243,9 @@ class Personality(models.Model):
 
     def __str__(self):
         return self.display_name
+
+    def get_urls(self):
+        return self.url.replace(' ', '').split(',')
 
 class Adjective(models.Model):
 
