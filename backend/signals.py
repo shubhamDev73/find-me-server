@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 from .models import Profile, Connect
-from .firebase import create_new_chat
+from .firebase import create_new_chat, create_connect_state
 
 
 def create_user_profile(sender, instance, created, **kwargs):
@@ -29,6 +29,7 @@ def create_firebase_chat(sender, instance, created, **kwargs):
         chat_id = create_new_chat(instance.id)
         instance.chat_id = chat_id
         instance.save()
+        create_connect_state(instance)
 
 class UpdateTime:
 
