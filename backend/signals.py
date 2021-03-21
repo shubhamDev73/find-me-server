@@ -73,6 +73,3 @@ class UpdateAccessTime(UpdateTime):
 
 class UpdateConnectTime(UpdateTime):
     attrs = {'retained1': 'retain1_time', 'retained2': 'retain2_time', 'retained': 'retain_time'}
-
-class UpdateQuestionnaireTime(UpdateTime):
-    attrs = {'submitted': 'submit_time'}

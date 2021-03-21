@@ -11,8 +11,7 @@ class BackendConfig(AppConfig):
                              delete_zero_interest,\
                              UpdateAccessTime,\
                              UpdateConnectTime,\
-                             create_firebase_chat,\
-                             UpdateQuestionnaireTime
+                             create_firebase_chat
 
         post_save.connect(create_user_profile, sender='auth.User')
         post_delete.connect(delete_model, sender='backend.Profile')
@@ -20,4 +19,3 @@ class BackendConfig(AppConfig):
         pre_save.connect(UpdateAccessTime.update_time, sender='backend.Access')
         pre_save.connect(UpdateConnectTime.update_time, sender='backend.Connect')
         post_save.connect(create_firebase_chat, sender='backend.Connect')
-        pre_save.connect(UpdateQuestionnaireTime.update_time, sender='backend.PersonalityQuestionnaire')

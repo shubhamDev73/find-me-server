@@ -81,7 +81,12 @@ def personality(request):
 @auth_exempt
 def personality_update(request):
     if request.method == "GET":
-        return {'url': f'https://tripetto.app/run/YK2S455EX3/?nick={request.profile.user.username}'}
+        all = PersonalityQuestionnaire.objects.all()
+        initial = all.filter(initial=True)
+        return {
+            'all': [obj.url for obj in all],
+            'initial': [obj.url for obj in initial],
+        }
     else:
         try:
             nick = request.data.pop('FindMe Nick')

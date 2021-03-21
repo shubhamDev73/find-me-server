@@ -99,17 +99,14 @@ class AdjectiveAdmin(BaseModelAdmin):
     search_fields = ['name', 'description']
 
 @admin.register(PersonalityQuestionnaire)
-class PersonalityQuestionnaireAdmin(InfoModelAdmin):
+class PersonalityQuestionnaireAdmin(BaseModelAdmin):
 
-    def has_change_permission(self, request, obj=None):
-        return False
+    def link(self, obj):
+        return format_html(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
 
-    readonly_fields = ['create_time', 'submitted', 'submit_time']
-    add_fields = ['user']
-    fields = list_display = add_fields + readonly_fields
-    list_filter = ['submitted', 'user']
-    search_fields = ['user__username']
-    date_hierarchy = 'create_time'
+    list_display = ['id', 'link', 'initial']
+    list_filter = ['initial']
+    search_fields = ['url']
 
 @admin.register(Interest)
 class InterestAdmin(BaseModelAdmin):

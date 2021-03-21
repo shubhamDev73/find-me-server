@@ -267,13 +267,11 @@ class Adjective(models.Model):
         return self.name
 
 class PersonalityQuestionnaire(models.Model):
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    submitted = models.BooleanField(default=False)
-    create_time = models.DateTimeField(auto_now_add=True)
-    submit_time = models.DateTimeField(null=True)
+    url = models.CharField(max_length=40)
+    initial = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.user)
+        return str(self.url)
 
 class Interest(models.Model):
     name = models.CharField(max_length=20)
