@@ -65,6 +65,10 @@ urls_found = [
     path('retain/', views.retain, name='retain'),
 ]
 
+urls_notification = [
+    path('token/', views.notification_token, name='token'),
+]
+
 urlpatterns = [
     path('', views.index, name='index'),
     path('', include(urls_auth), name='auth'),
@@ -74,4 +78,5 @@ urlpatterns = [
     path('views/', include(urls_views), name='views'),
     path('requests/', include(urls_requests), name='requests'),
     path('found/', include(urls_found), name='found'),
+    path('notification/', include(urls_notification), name='notification'),
 ]

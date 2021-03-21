@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 from .models import Profile, Connect
-from .firebase import create_new_chat, create_connect_state
+from . import firebase
 
 
 def create_user_profile(sender, instance, created, **kwargs):
@@ -24,12 +24,14 @@ def delete_zero_interest(sender, instance, created, **kwargs):
     if not instance.amount:
         instance.delete()
 
-def create_firebase_chat(sender, instance, created, **kwargs):
+def on_connect_save(sender, instance, created, **kwargs):
     if created:
-        chat_id = create_new_chat(instance.id)
+        chat_id = firebase.create_new_chat(instance.id)
         instance.chat_id = chat_id
         instance.save()
-        create_connect_state(instance)
+        firebase.create_connect_state(instance)
+        firebase.send_notification(instance.user1, {'title': 'New connect!', 'body': 'You have got a new connect!'})
+        firebase.send_notification(instance.user2, {'title': 'New connect!', 'body': 'You have got a new connect!'})
 
 class UpdateTime:
 

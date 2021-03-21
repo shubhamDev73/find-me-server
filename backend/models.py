@@ -76,6 +76,7 @@ class Profile(models.Model):
     avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
     _personality = models.CharField(max_length=NUM_FACETS * FLOAT_PRECISION, default='0' * NUM_FACETS * FLOAT_PRECISION)
     last_questionnaire_time = models.DateTimeField(null=True)
+    fcm_token = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return str(self.user)

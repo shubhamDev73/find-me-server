@@ -77,6 +77,11 @@
 				<li>/read/ : (POST) set last read time for this chat. data: {"id": 1}.</li>
 				<li>/retain/ : (POST) retain a connected user. data: {"id": 1}.</li>
 			</ul>
+
+			<h3>/notification/</h3>
+			<ul>
+				<li>/token/ : (POST) set fcm token for sending notifications. data: { "fcm_token" }.</li>
+			</ul>
 		</ul>
 
 		<h2>All response are in json format and contain "error" field if an error occured (and return response code 404). response["error"] is well-formatted and can be shown to the user. otherwise contain the data.</h2>

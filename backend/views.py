@@ -67,6 +67,7 @@ def login(request):
 @require_POST
 def logout(request):
     request.profile.expired = True
+    request.profile.fcm_token = ''
     request.profile.save()
 
 @require_GET
@@ -383,3 +384,11 @@ def retain(request):
     except Connect.DoesNotExist:
         pass
     return {'error': 'Connect not found.', 'code': 404}
+
+@require_POST
+def notification_token(request):
+    if token := request.data.get('fcm_token'):
+        request.profile.fcm_token = token
+        request.profile.save()
+    else:
+        return {'error': 'No fcm token specified.'}

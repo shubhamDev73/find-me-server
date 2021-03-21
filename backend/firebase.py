@@ -1,5 +1,5 @@
 from django.conf import settings
-from firebase_admin import credentials, firestore, initialize_app, db
+from firebase_admin import credentials, firestore, initialize_app, db, messaging
 
 from .models import Connect
 
@@ -65,3 +65,9 @@ def create_connect_state(connect):
         'lastSeen': state['lastSeen'],
         'typing': False,
     })
+
+def send_notification(profile, notification_dict):
+    notification = messaging.Notification(**notification_dict)
+    message = messaging.Message(notification=notification, token=profile.fcm_token)
+
+    return messaging.send(message)

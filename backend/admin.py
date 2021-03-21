@@ -63,8 +63,8 @@ class ProfileAdmin(InfoModelAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
-    fields = list_display = ['user', 'personality', 'last_questionnaire_time', 'base_avatar', 'mood', 'expired']
     readonly_fields = ['user', 'personality', 'last_questionnaire_time', 'base_avatar', 'mood']
+    fields = list_display = readonly_fields + ['expired']
     list_filter = [AvatarBaseListFilter, 'avatar__mood', 'expired']
     search_fields = ['user__username', 'avatar__base__name', 'avatar__mood__name']
 
@@ -217,7 +217,7 @@ class ConnectAdmin(InfoModelAdmin):
         queryset.update(active=False)
     expire_connect.short_description = 'Expire connects'
 
-    readonly_fields = ['id', 'user1', 'user2', 'chat_id', 'create_time', 'last_read_time1', 'last_read_time2', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
+    readonly_fields = ['id', 'user1', 'user2', 'chat_id', 'create_time', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
     fields = ['active'] + readonly_fields
     list_display = readonly_fields + ['active']
     add_fields = ['user1', 'user2', 'active']
