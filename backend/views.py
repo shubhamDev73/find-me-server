@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from .decorators import auth_exempt
 from .models import *
-from .firebase import get_last_message, get_unread_num
+from . import firebase
 
 from algo.parameters import *
 
@@ -129,6 +129,7 @@ def personality_update(request):
                     else:
                         prev_facets[index] = value * weight + prev_facets[index] * (1 - weight)
             profile.save_facets(prev_facets)
+        firebase.send_notification(profile, {'title': 'Personality updated!', 'body': 'Your personality has been updated according to the questions you answered!'}, type='Personality')
 
 @require_GET
 def me_interests(request):
@@ -322,8 +323,8 @@ def accept(request):
 
 @require_GET
 def found(request):
-    connects = [(connect.id, connect.chat_id, 1, get_last_message(connect.chat_id), get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained1, connect.user2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
-    connects += [(connect.id, connect.chat_id, 2, get_last_message(connect.chat_id), get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained2, connect.user1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
+    connects = [(connect.id, connect.chat_id, 1, firebase.get_last_message(connect.chat_id), firebase.get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained1, connect.user2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
+    connects += [(connect.id, connect.chat_id, 2, firebase.get_last_message(connect.chat_id), firebase.get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained2, connect.user1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
     return [{**profile.get_basic_info(), **{
         "id": id,
         "me": me,

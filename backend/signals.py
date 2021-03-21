@@ -30,8 +30,8 @@ def on_connect_save(sender, instance, created, **kwargs):
         instance.chat_id = chat_id
         instance.save()
         firebase.create_connect_state(instance)
-        firebase.send_notification(instance.user1, {'title': 'New connect!', 'body': 'You have got a new connect!'})
-        firebase.send_notification(instance.user2, {'title': 'New connect!', 'body': 'You have got a new connect!'})
+        firebase.send_notification(instance.user1, {'title': 'New connect!', 'body': 'You have got a new connect!'}, type='Found')
+        firebase.send_notification(instance.user2, {'title': 'New connect!', 'body': 'You have got a new connect!'}, type='Found')
 
 class UpdateTime:
 
