@@ -11,7 +11,8 @@ class BackendConfig(AppConfig):
                              delete_zero_interest,\
                              UpdateAccessTime,\
                              UpdateConnectTime,\
-                             on_connect_save
+                             on_connect_save,\
+                             on_access_save
 
         post_save.connect(create_user_profile, sender='auth.User')
         post_delete.connect(delete_model, sender='backend.Profile')
@@ -19,3 +20,4 @@ class BackendConfig(AppConfig):
         pre_save.connect(UpdateAccessTime.update_time, sender='backend.Access')
         pre_save.connect(UpdateConnectTime.update_time, sender='backend.Connect')
         post_save.connect(on_connect_save, sender='backend.Connect')
+        post_save.connect(on_access_save, sender='backend.Access')

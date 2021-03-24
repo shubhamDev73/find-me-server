@@ -33,6 +33,10 @@ def on_connect_save(sender, instance, created, **kwargs):
         firebase.send_notification(instance.user1, {'title': 'New connect!', 'body': 'You have got a new connect!'}, type='Found')
         firebase.send_notification(instance.user2, {'title': 'New connect!', 'body': 'You have got a new connect!'}, type='Found')
 
+def on_access_save(sender, instance, created, **kwargs):
+    if created:
+        firebase.send_notification(instance.me, {'title': 'New accesss!', 'body': 'You have got access to a new user profile!'}, type='Find')
+
 class UpdateTime:
 
     attrs = {}
@@ -70,8 +74,12 @@ class UpdateAccessTime(UpdateTime):
                 except Connect.DoesNotExist:
                     pass
 
+    def send_request_notification(value, sender, instance, **kwargs):
+        if value:
+            firebase.send_notification(instance.other, {'title': 'New request!', 'body': 'You have got a new connection request!'}, type='Request')
+
     attrs = {'viewed': 'view_time', 'requested': 'request_time', 'connected': 'connect_time'}
-    methods = {'connected': create_connect}
+    methods = {'connected': create_connect, 'requested': send_request_notification}
 
 class UpdateConnectTime(UpdateTime):
     attrs = {'retained1': 'retain1_time', 'retained2': 'retain2_time', 'retained': 'retain_time'}
