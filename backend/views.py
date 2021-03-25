@@ -327,12 +327,13 @@ def found(request):
 def found_read(request):
     try:
         connect = Connect.objects.get(active=True, pk=request.data['id'])
-        if connect.user1 == request.profile:
-            connect.last_read_time1 = timezone.now()
+        time = timezone.now()
+        if connect.user1 == request.profile and time > connect.last_read_time1:
+            connect.last_read_time1 = time
             connect.save()
             return
-        if connect.user2 == request.profile:
-            connect.last_read_time2 = timezone.now()
+        if connect.user2 == request.profile and time > connect.last_read_time2:
+            connect.last_read_time2 = time
             connect.save()
             return
     except Connect.DoesNotExist:
