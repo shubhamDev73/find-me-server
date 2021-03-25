@@ -203,19 +203,9 @@ def me_avatar_update(request):
 
 @require_GET
 def interests(request):
-    user_interests = UserInterest.objects.filter(user=request.profile)
-
-    def find_amount(interest):
-        try:
-            interest = user_interests.get(interest=interest)
-            return interest.amount
-        except UserInterest.DoesNotExist:
-            return 0
-
     return [{
         "id": interest.id,
         "name": interest.name,
-        "amount": find_amount(interest),
         "questions": [{
             "id": question.id,
             "question": question.text,
