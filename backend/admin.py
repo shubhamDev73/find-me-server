@@ -69,7 +69,7 @@ class ProfileAdmin(InfoModelAdmin):
     search_fields = ['user__username', 'avatar__base__name', 'avatar__mood__name']
 
     def expire_tokens(self, request, queryset):
-        queryset.update(expired=True)
+        queryset.update(expired=True, fcm_token='')
     expire_tokens.short_description = 'Expire auth tokens'
 
     actions = [expire_tokens]
