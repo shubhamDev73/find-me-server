@@ -72,7 +72,7 @@ def logout(request):
 
 @require_GET
 def me(request):
-    return request.profile.get_info()
+    return request.profile.get_info(empty_questions=True)
 
 @require_GET
 def personality(request):

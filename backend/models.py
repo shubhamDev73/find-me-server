@@ -155,12 +155,12 @@ class Profile(models.Model):
         except UserInterest.DoesNotExist:
             return {'error': 'Interest not found.', 'code': 404}
 
-    def get_info(self, interest_questions=True):
+    def get_info(self, interest_questions=True, empty_questions=False):
         return {
             "nick": self.user.username,
             "avatar": self.avatar.url,
             "personality": self.traits,
-            "interests": self.get_all_interests(interest_questions),
+            "interests": self.get_all_interests(questions=interest_questions, blank=empty_questions),
             "mood": self.avatar.mood.name,
         }
 
