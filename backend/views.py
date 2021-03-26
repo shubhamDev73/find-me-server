@@ -234,7 +234,7 @@ def avatars(request, pk):
 @require_GET
 def find(request):
     return {
-        "users": [{**access.other.get_basic_info(), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(me=request.profile).filter(connected=False)],
+        "users": [{**access.other.get_basic_info(), **{"id": access.id, "timestamp": access.create_time}} for access in Access.objects.filter(active=True).filter(me=request.profile).filter(connected=False)],
         "views-remaining": MAX_PROFILE_VIEWS - Access.objects.filter(active=True).filter(me=request.profile).filter(viewed=True).count(),
     }
 
@@ -269,7 +269,7 @@ def request(request):
 
 @require_GET
 def views(request):
-    return [{**access.me.get_info(interest_questions=False), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(viewed=True).filter(requested=False)]
+    return [{**access.me.get_info(interest_questions=False), **{"id": access.id, "timestamp": access.view_time}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(viewed=True).filter(requested=False)]
 
 @require_GET
 def view_view(request, pk):
@@ -283,7 +283,7 @@ def view_view(request, pk):
 
 @require_GET
 def requests(request):
-    return [{**access.me.get_basic_info(), **{"id": access.id}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
+    return [{**access.me.get_basic_info(), **{"id": access.id, "timestamp": access.request_time}} for access in Access.objects.filter(active=True).filter(other=request.profile).filter(requested=True).filter(connected=False)]
 
 @require_GET
 def request_view(request, pk):
@@ -311,17 +311,18 @@ def accept(request):
 
 @require_GET
 def found(request):
-    connects = [(connect.id, connect.chat_id, 1, firebase.get_last_message(connect.chat_id), firebase.get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained1, connect.user2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
-    connects += [(connect.id, connect.chat_id, 2, firebase.get_last_message(connect.chat_id), firebase.get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained2, connect.user1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
+    connects = [(connect.id, connect.create_time, connect.chat_id, 1, firebase.get_last_message(connect.chat_id), firebase.get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained1, connect.user2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
+    connects += [(connect.id, connect.create_time, connect.chat_id, 2, firebase.get_last_message(connect.chat_id), firebase.get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained2, connect.user1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
     return [{**profile.get_basic_info(), **{
         "id": id,
+        "timestamp": create_time,
         "me": me,
         "chat_id": chat_id,
         "last_message": last_message,
         "unread_num": unread_num,
         "retain_request_sent": retain_request,
         "retained": retained,
-    }} for id, chat_id, me, last_message, unread_num, retain_request, profile, retained in connects]
+    }} for id, create_time, chat_id, me, last_message, unread_num, retain_request, profile, retained in connects]
 
 @require_POST
 def found_read(request):
