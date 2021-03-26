@@ -311,18 +311,18 @@ def accept(request):
 
 @require_GET
 def found(request):
-    connects = [(connect.id, connect.create_time, connect.chat_id, 1, firebase.get_last_message(connect.chat_id), firebase.get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained1, connect.user2, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
-    connects += [(connect.id, connect.create_time, connect.chat_id, 2, firebase.get_last_message(connect.chat_id), firebase.get_unread_num(connect.chat_id, 1, connect.last_read_time1), connect.retained2, connect.user1, connect.retained()) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
-    return [{**profile.get_basic_info(), **{
-        "id": id,
-        "timestamp": create_time,
+    connects = [(connect, 1) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
+    connects += [(connect, 2) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
+    return [{**(connect.user2 if me == 1 else connect.user1).get_basic_info(), **{
+        "id": connect.id,
+        "timestamp": connect.create_time,
         "me": me,
-        "chat_id": chat_id,
-        "last_message": last_message,
-        "unread_num": unread_num,
-        "retain_request_sent": retain_request,
-        "retained": retained,
-    }} for id, create_time, chat_id, me, last_message, unread_num, retain_request, profile, retained in connects]
+        "chat_id": connect.chat_id,
+        "last_message": firebase.get_last_message(connect.chat_id),
+        "unread_num": firebase.get_unread_num(connect.chat_id, me, connect.last_read_time1 if me == 1 else connect.last_read_time2),
+        "retain_request_sent": connect.retained1 if me == 1 else connect.retained2,
+        "retained": connect.retained(),
+    }} for connect, me in connects]
 
 @require_POST
 def found_read(request):
