@@ -232,6 +232,10 @@ def avatars(request, pk):
         return {'error': 'Avatar not found.', 'code': 404}
 
 @require_GET
+def moods(request):
+    return [{"id": mood.id, "name": mood.name, "url": mood.url} for mood in Mood.objects.all()]
+
+@require_GET
 def find(request):
     return {
         "users": [{**access.other.get_basic_info(), **{"id": access.id, "timestamp": access.create_time}} for access in Access.objects.filter(active=True).filter(me=request.profile).filter(connected=False)],

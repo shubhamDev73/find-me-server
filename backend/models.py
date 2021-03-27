@@ -32,6 +32,10 @@ def avatar_path_v1(instance, filename):
 def avatar_path_v2(instance, filename):
     return avatar_path(instance, filename, 'v2')
 
+def mood_weather_path(instance, filename):
+    name = instance.name.lower()
+    return unique_name(f'weathers/{name}.{filename.rsplit(".", 1)[1]}')
+
 class AvatarBase(models.Model):
     name = models.CharField(max_length=20)
     image = models.ImageField(upload_to=avatar_base_path)
@@ -45,6 +49,11 @@ class AvatarBase(models.Model):
 
 class Mood(models.Model):
     name = models.CharField(max_length=20)
+    weather = models.ImageField(upload_to=mood_weather_path)
+
+    @property
+    def url(self):
+        return f"http://{settings.HOST}{self.weather.url}"
 
     def __str__(self):
         return self.name
@@ -52,8 +61,8 @@ class Mood(models.Model):
 class Avatar(models.Model):
     base = models.ForeignKey(AvatarBase, on_delete=models.CASCADE)
     mood = models.ForeignKey(Mood, on_delete=models.CASCADE)
-    v1 = models.ImageField(upload_to=avatar_path_v1, blank=True, null=True)
-    v2 = models.ImageField(upload_to=avatar_path_v2, blank=True, null=True)
+    v1 = models.ImageField(upload_to=avatar_path_v1)
+    v2 = models.ImageField(upload_to=avatar_path_v2)
 
     def get_url(self, variant='v1'):
         try:

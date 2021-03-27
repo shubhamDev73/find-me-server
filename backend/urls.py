@@ -24,6 +24,7 @@ urls_avatars = [
 urls_data = [
     path('interests/', include(urls_interests), name='interests'),
     path('avatars/', include(urls_avatars), name='avatars'),
+    path('moods/', views.moods, name='moods'),
 ]
 
 urls_me = [
