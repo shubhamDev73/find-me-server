@@ -145,6 +145,7 @@ class Profile(models.Model):
                 "id": user_interest.interest.id,
                 "name": user_interest.interest.name,
                 "amount": user_interest.amount,
+                "timestamp": user_interest.last_change,
             },
             **({
                 "questions": sorted(filter(lambda question: blank or question['answer'] != '', [
@@ -294,6 +295,7 @@ class UserInterest(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     interest = models.ForeignKey(Interest, on_delete=models.CASCADE)
     amount = models.IntegerField(default=0)
+    last_change = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{str(self.user)} - {str(self.interest)} : {self.amount}"
