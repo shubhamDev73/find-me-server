@@ -50,29 +50,34 @@
 				<li>/&lt;avatar-id&gt;/ : retrieve all variants for this avatar id. [{"id", "mood", "url"}, {},..].</li>
 			</ul>
 
+			<h3>/moods/</h3>
+			<ul>
+				<li>/ : retrieve all moods. [ {"id", "name", "url"}, {},..].</li>
+			</ul>
+
 			<h3>/find/</h3>
 			<ul>
-				<li>/ : retrieve all users I can find. {"views-remaining", "users": [{"id", nick", "avatar"}, {},..] }.</li>
+				<li>/ : retrieve all users I can find. {"views-remaining", "users": [{"id", nick", "avatar", "mood", "timestamp"}, {},..] }.</li>
 				<li>/&lt;id&gt;/ : view a user info. returns same data as /me/. returns error if max views exceeded.</li>
 				<li>/request/ : (POST) request a connection from this user. returns error if not viewed or already requested.</li>
 			</ul>
 
 			<h3>/views/</h3>
 			<ul>
-				<li>/ : retrieve all users who have viewed my profile. [ {"id", "nick", "personality", "interests", "avatar", "mood"}, {},..].</li>
+				<li>/ : retrieve all users who have viewed my profile. [ {"id", "nick", "avatar", "mood", "timestamp"}, {},..].</li>
 				<li>/&lt;id&gt;/ : view a user info. returns same data as /me/.</li>
 			</ul>
 
 			<h3>/requests/</h3>
 			<ul>
-				<li>/ : retrieve all users who have requested for my connection. [ {"id", "nick" "avatar"}, {},..].</li>
+				<li>/ : retrieve all users who have requested for my connection. [ {"id", "nick", "avatar", "mood", "timestamp"}, {},..].</li>
 				<li>/&lt;id&gt;/ : view a user info. returns same data as /me/.</li>
 				<li>/accept/ : (POST) accept a request. date: {"id": 1}. returns an error if request already accepted.</li>
 			</ul>
 
 			<h3>/found/</h3>
 			<ul>
-				<li>/ : retrieve all users connected with me. [ {"id", "me (1 or 2)", "chat_id", "last_message", "unread_num", "nick", "avatar", "retain_request_sent", "retained"}, {},..].</li>
+				<li>/ : retrieve all users connected with me. [ {"id", "me (1 or 2)", "chat_id", "last_message", "unread_num", "nick", "avatar", "mood", "timestamp", "retain_request_sent", "retained"}, {},..].</li>
 				<li>/&lt;id&gt;/ : view a user info. returns same data as /me/.</li>
 				<li>/read/ : (POST) set last read time for this chat. data: {"id": 1}.</li>
 				<li>/retain/ : (POST) retain a connected user. data: {"id": 1}.</li>

@@ -177,6 +177,7 @@ class Profile(models.Model):
         return {
             "nick": self.user.username,
             "avatar": self.avatar.url,
+            "mood": self.avatar.mood.name,
         }
 
     def get_partial_info(self):
