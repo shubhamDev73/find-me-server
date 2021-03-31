@@ -4,7 +4,7 @@ import numpy as np
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator,  get_available_image_extensions, FileExtensionValidator
 from django.utils import timezone
 
 from algo.parameters import *
@@ -34,7 +34,11 @@ def avatar_path_v2(instance, filename):
 
 def mood_weather_path(instance, filename):
     name = instance.name.lower()
-    return unique_name(f'weathers/{name}.{filename.rsplit(".", 1)[1]}')
+    return unique_name(f'moods/{name}_weather.{filename.rsplit(".", 1)[1]}')
+
+def mood_icon_path(instance, filename):
+    name = instance.name.lower()
+    return unique_name(f'moods/{name}_icon.{filename.rsplit(".", 1)[1]}')
 
 class AvatarBase(models.Model):
     name = models.CharField(max_length=20)
@@ -50,10 +54,18 @@ class AvatarBase(models.Model):
 class Mood(models.Model):
     name = models.CharField(max_length=20)
     weather = models.ImageField(upload_to=mood_weather_path)
+    icon = models.FileField(upload_to=mood_icon_path, validators=[FileExtensionValidator(allowed_extensions=get_available_image_extensions() + ["svg"])])
+
+    def get_url(self, type='weather'):
+        try:
+            url = f"http://{settings.HOST}{getattr(self, type).url}"
+        except:
+            url = ""
+        return url
 
     @property
     def url(self):
-        return f"http://{settings.HOST}{self.weather.url}"
+        return {type: self.get_url(type) for type in ["weather", "icon"]}
 
     def __str__(self):
         return self.name

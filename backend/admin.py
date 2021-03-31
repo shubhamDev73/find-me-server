@@ -177,11 +177,16 @@ class AvatarBaseAdmin(BaseModelAdmin):
 @admin.register(Mood)
 class MoodAdmin(BaseModelAdmin):
 
-    def weather(self, obj):
-        return format_html(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
+    def link(self, obj, type):
+        return format_html(f'<a href="{obj.get_url(type)}" target="_blank">{obj.get_url(type)}</a>')
 
-    list_display = ['name', 'weather']
-    search_fields = ['name', 'url']
+    def weather(self, obj):
+        return self.link(obj, 'weather')
+    def icon(self, obj):
+        return self.link(obj, 'icon')
+
+    list_display = ['name', 'weather', 'icon']
+    search_fields = ['name', 'weather', 'icon']
 
 @admin.register(Avatar)
 class AvatarAdmin(BaseModelAdmin):
