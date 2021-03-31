@@ -168,6 +168,7 @@ class Profile(models.Model):
     def get_info(self, interest_questions=True, empty_questions=False):
         return {
             "nick": self.user.username,
+            "base_avatar": self.avatar.base.name,
             "avatar": self.avatar.url,
             "personality": self.traits,
             "interests": self.get_all_interests(questions=interest_questions, blank=empty_questions),
