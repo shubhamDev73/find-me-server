@@ -221,7 +221,12 @@ def interest(request, pk):
 
 @require_GET
 def base_avatars(request):
-    return [{"id": base.id, "name": base.name, "url": base.url} for base in AvatarBase.objects.all()]
+    return [{
+        "id": base.id,
+        "name": base.name,
+        "url": base.url,
+        "avatars": [{"id": avatar.id, "mood": avatar.mood.name, "url": avatar.url} for avatar in Avatar.objects.filter(base=base)]
+    } for base in AvatarBase.objects.all()]
 
 @require_GET
 def avatars(request, pk):
