@@ -237,15 +237,12 @@ class Profile(models.Model):
                 trait_value += facet_value
                 index = find_index(facet_value, pool[j + 1])
                 facet_adjs = adjs.filter(facet=j+1).filter(pool=index+1)
-                try:
-                    adjectives.extend(random.choices(facet_adjs))
-                except:
-                    pass
+                adjectives.append(facet_adjs)
             traits[trait.display_name] = {
                 "value": personality[trait.display_name],
                 "description": trait.description,
                 "url": trait.get_urls(),
-                "adjectives": [{"name": adjective.name, "description": adjective.description} for adjective in adjectives]
+                "adjectives": [[{"name": adjective.name, "description": adjective.description} for adjective in trait_adjs] for trait_adjs in adjectives]
             }
         return traits
 
