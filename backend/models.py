@@ -185,6 +185,7 @@ class Profile(models.Model):
             "personality": self.traits,
             "interests": self.get_all_interests(questions=interest_questions, blank=empty_questions),
             "mood": self.avatar.mood.name,
+            "avatar_timeline": self.avatar_timeline
         }
 
     def get_basic_info(self):
@@ -247,6 +248,11 @@ class Profile(models.Model):
                 "adjectives": [{"name": adjective.name, "description": adjective.description} for adjective in adjectives]
             }
         return traits
+
+    @property
+    def avatar_timeline(self):
+        timelines = AvatarTimeline.objects.filter(user=self).order_by('timestamp')
+        return [{"timestamp": timeline.timestamp, "mood": timeline.avatar.mood.name, "base_avatar": timeline.avatar.base.name} for timeline in timelines]
 
 class Personality(models.Model):
 
@@ -327,6 +333,14 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"{str(self.user_interest)} - {str(self.question)} : {self.text}"
+
+class AvatarTimeline(models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    avatar = models.ForeignKey(Avatar, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{str(self.user)} - {str(self.avatar)} : {self.timestamp}"
 
 class Access(models.Model):
 

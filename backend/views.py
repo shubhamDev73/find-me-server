@@ -196,6 +196,8 @@ def me_avatar_update(request):
         avatar = Avatar.objects.get(pk=request.data['id'])
         request.profile.avatar = avatar
         request.profile.save()
+        timeline = AvatarTimeline.objects.create(user=request.profile, avatar=avatar)
+        timeline.save()
     except Avatar.DoesNotExist:
         return {'error': 'Avatar not found.', 'code': 404}
 

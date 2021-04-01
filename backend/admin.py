@@ -203,6 +203,14 @@ class AvatarAdmin(BaseModelAdmin):
     list_filter = ['base__name', 'mood']
     search_fields = ['base__name', 'mood__name']
 
+@admin.register(AvatarTimeline)
+class AvatarTimelineAdmin(UserInfoModelAdmin):
+
+    list_display = ['user', 'avatar', 'timestamp']
+    list_filter = ['user', 'avatar__base', 'avatar__mood']
+    search_fields = ['user__username', 'avatar__base__name', 'avatar__mood__name']
+    date_hierarchy = 'timestamp'
+
 @admin.register(Access)
 class AccessAdmin(InfoModelAdmin):
 
