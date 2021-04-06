@@ -100,7 +100,7 @@ def personality_update(request):
         for question in request.data:
             if question[:8] != 'tripetto':
                 trait, facet = QUESTION_FACETS[question]
-                value = (int(request.data[question]) / 5) * 0.998 + 0.001
+                value = ((int(request.data[question]) - 1)/ 4) * 0.998 + 0.001
                 if facet < 0:
                     value = 1 - value
                 facets[trait.value * FACETS_PER_TRAIT + abs(facet) - 1] = value
