@@ -13,6 +13,7 @@ from algo.parameters import *
 
 
 MAX_PROFILE_VIEWS = 0
+MOOD_CHANGE_TIME = 60 * 60 * 4 # in seconds
 QUESTION_FACETS = {
     "Make friends easily.": (Trait.E, 1),
     "Spend time reflecting on things.": (Trait.O, 1),
@@ -194,10 +195,24 @@ def me_avatar(request):
 def me_avatar_update(request):
     try:
         avatar = Avatar.objects.get(pk=request.data['id'])
+        if avatar == request.profile.avatar:
+            return
+
+        last_timeline = AvatarTimeline.objects.filter(user=request.profile).order_by('-timestamp')
+        if len(last_timeline):
+            last_timeline = last_timeline[0]
+        else:
+            last_timeline = None
+
+        if last_timeline and (timezone.now() - last_timeline.timestamp).total_seconds() < MOOD_CHANGE_TIME:
+            timeline = last_timeline
+            timeline.avatar = avatar
+        else:
+            timeline = AvatarTimeline.objects.create(user=request.profile, avatar=avatar)
+        timeline.save()
+
         request.profile.avatar = avatar
         request.profile.save()
-        timeline = AvatarTimeline.objects.create(user=request.profile, avatar=avatar)
-        timeline.save()
     except Avatar.DoesNotExist:
         return {'error': 'Avatar not found.', 'code': 404}
 
