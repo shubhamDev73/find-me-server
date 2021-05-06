@@ -9,6 +9,13 @@ admin.site.site_header = "Find Me - Admin Panel"
 
 class BaseModelAdmin(admin.ModelAdmin):
 
+    def get_link(self, url):
+        return format_html(f'<a href="{url}" target="_blank">{url}</a>')
+
+    def get_image(self, url):
+        print("Image?")
+        return format_html(f'<a href="{url}" target="_blank"><img src="{url}" alt="{url}" height="100"></a>')
+
     def get_fields(self, request, obj=None):
         if not (fields := self.fields):
             fields = super().get_fields(request, obj)
@@ -169,7 +176,7 @@ class AnswerAdmin(UserInfoModelAdmin):
 class AvatarBaseAdmin(BaseModelAdmin):
 
     def link(self, obj):
-        return format_html(f'<a href="{obj.url}" target="_blank">{obj.url}</a>')
+        return self.get_image(obj.url)
 
     list_display = ['name', 'link']
     search_fields = ['name', 'url']
@@ -177,29 +184,23 @@ class AvatarBaseAdmin(BaseModelAdmin):
 @admin.register(Mood)
 class MoodAdmin(BaseModelAdmin):
 
-    def link(self, obj, type):
-        return format_html(f'<a href="{obj.get_url(type)}" target="_blank">{obj.get_url(type)}</a>')
+    def weather_image(self, obj):
+        return self.get_image(obj.get_url('weather'))
+    def icon_image(self, obj):
+        return self.get_image(obj.get_url('icon'))
 
-    def weather(self, obj):
-        return self.link(obj, 'weather')
-    def icon(self, obj):
-        return self.link(obj, 'icon')
-
-    list_display = ['name', 'weather', 'icon']
+    list_display = ['name', 'weather_image', 'icon_image']
     search_fields = ['name', 'weather', 'icon']
 
 @admin.register(Avatar)
 class AvatarAdmin(BaseModelAdmin):
 
-    def link(self, obj, variant):
-        return format_html(f'<a href="{obj.get_url(variant)}" target="_blank">{obj.get_url(variant)}</a>')
+    def icon_image(self, obj):
+        return self.get_image(obj.get_url('v1'))
+    def main_image(self, obj):
+        return self.get_image(obj.get_url('v2'))
 
-    def v1(self, obj):
-        return self.link(obj, 'v1')
-    def v2(self, obj):
-        return self.link(obj, 'v2')
-
-    list_display = ['base', 'mood', 'v1', 'v2']
+    list_display = ['base', 'mood', 'icon_image', 'main_image']
     list_filter = ['base__name', 'mood']
     search_fields = ['base__name', 'mood__name']
 
