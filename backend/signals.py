@@ -33,6 +33,12 @@ def on_connect_save(sender, instance, created, **kwargs):
         firebase.send_notification(instance.user1, {'title': 'New connect!', 'body': 'You have got a new connect!'}, type='Found')
         firebase.send_notification(instance.user2, {'title': 'New connect!', 'body': 'You have got a new connect!'}, type='Found')
 
+def on_access_pre_save(sender, instance, **kwargs):
+    if instance.requested:
+        in_db = sender.objects.get(pk=instance.pk)
+        if not in_db.requested:
+            firebase.send_notification(instance.other, {'title': 'New request!', 'body': 'You have got a new connect request!'}, type='Request')
+
 def on_access_save(sender, instance, created, **kwargs):
     if created:
         firebase.send_notification(instance.me, {'title': 'New accesss!', 'body': 'You have got access to a new user profile!'}, type='Find')

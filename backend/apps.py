@@ -12,6 +12,7 @@ class BackendConfig(AppConfig):
                              UpdateAccessTime,\
                              UpdateConnectTime,\
                              on_connect_save,\
+                             on_access_pre_save,\
                              on_access_save
 
         post_save.connect(create_user_profile, sender='auth.User')
@@ -20,4 +21,5 @@ class BackendConfig(AppConfig):
         pre_save.connect(UpdateAccessTime.update_time, sender='backend.Access')
         pre_save.connect(UpdateConnectTime.update_time, sender='backend.Connect')
         post_save.connect(on_connect_save, sender='backend.Connect')
+        pre_save.connect(on_access_pre_save, sender='backend.Access')
         post_save.connect(on_access_save, sender='backend.Access')
