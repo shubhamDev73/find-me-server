@@ -15,16 +15,23 @@ from algo.parameters import *
 MAX_PROFILE_VIEWS = 0
 MOOD_CHANGE_TIME = 60 * 60 * 4 # in seconds
 QUESTION_FACETS = {
-    "Make friends easily.": (Trait.E, 1),
-    "Spend time reflecting on things.": (Trait.O, 1),
-    "Feel comfortable with myself.": (Trait.N, -3),
-    "Make people feel welcome.": (Trait.A, 3),
-    "Remain calm under pressure.": (Trait.N, -6),
-    "Am willing to try anything once.": (Trait.E, 5),
-    "Believe that there is no absolute right and wrong.": (Trait.O, 6),
-    "Need a push to get started.": (Trait.C, -5),
-    "Do just enough work to get by.": (Trait.C, -4),
-    "Value cooperation over competition.": (Trait.A, 6),
+    "Do you find it easy to meet new people and make friends?": (Trait.E, 1),
+    "Do you pause and reflect upon things?": (Trait.O, 1),
+    "Do you feel uncomfortable with yourself?": (Trait.N, 3),
+    "Do you make people feel welcome?": (Trait.A, 3),
+    "Do you have a tendency to remain calm under pressure?": (Trait.N, -6),
+    "Are you willing to try anything once?": (Trait.E, 5),
+    "Do you feel that there is no absolute right and wrong?": (Trait.O, 6),
+    "Is there a push required for you to get started?": (Trait.C, -5),
+    "Do you believe in doing just enough work to get by?": (Trait.C, -4),
+    "Do you value competition over cooperation in a real life scenario?": (Trait.A, -6)
+}
+OPTION_VALUES = {
+    "never": 1,
+    "rarely": 2,
+    "sometimes": 3,
+    "often": 4,
+    "regularly": 5,
 }
 
 @require_GET
@@ -98,12 +105,13 @@ def personality_update(request):
 
         facets = [0 for _ in range(NUM_FACETS)]
         for question in request.data:
-            if question[:8] != 'tripetto':
-                trait, facet = QUESTION_FACETS[question]
-                value = ((int(request.data[question]) - 1)/ 4) * 0.998 + 0.001
-                if facet < 0:
-                    value = 1 - value
-                facets[trait.value * FACETS_PER_TRAIT + abs(facet) - 1] = value
+            trait, facet = QUESTION_FACETS.get(question, (None, None))
+            if trait is None:
+                continue
+            value = ((OPTION_VALUES[request.data[question]] - 1)/ 4) * 0.998 + 0.001
+            if facet < 0:
+                value = 1 - value
+            facets[trait.value * FACETS_PER_TRAIT + abs(facet) - 1] = value
 
         if profile.last_questionnaire_time is None:
             profile.save_facets(facets)
