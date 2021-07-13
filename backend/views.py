@@ -103,7 +103,7 @@ def personality_update(request):
         except Profile.DoesNotExist:
             return {'error': 'Nick not found.'}
 
-        facets = [0 for _ in range(NUM_FACETS)]
+        facets = [None for _ in range(NUM_FACETS)]
         for question in request.data:
             trait, facet = QUESTION_FACETS.get(question, (None, None))
             if trait is None:
@@ -114,6 +114,19 @@ def personality_update(request):
             facets[trait.value * FACETS_PER_TRAIT + abs(facet) - 1] = value
 
         if profile.last_questionnaire_time is None:
+            for trait in range(NUM_TRAITS):
+                absent = []
+                avg = 0
+                for i in range(FACETS_PER_TRAIT):
+                    facet = facets[trait * FACETS_PER_TRAIT + i]
+                    if facet is None:
+                        absent.append(i)
+                    else:
+                        avg += facet
+                avg /= FACETS_PER_TRAIT - len(absent)
+                for i in absent:
+                    facets[trait * FACETS_PER_TRAIT + i] = avg
+
             profile.save_facets(facets)
         else:
             days = (timezone.now() - profile.last_questionnaire_time).days
@@ -132,7 +145,7 @@ def personality_update(request):
 
             prev_facets = profile.facets
             for index, value in enumerate(facets):
-                if value != 0:
+                if value is not None:
                     if prev_facets[index] == 0:
                         prev_facets[index] = value
                     else:
