@@ -263,7 +263,7 @@ def base_avatars(request):
         "id": base.id,
         "name": base.name,
         "url": base.url,
-        "avatars": [{"id": avatar.id, "mood": avatar.mood.name, "url": avatar.url} for avatar in Avatar.objects.filter(base=base)]
+        "avatars": [{"id": avatar.id, "mood": avatar.mood.name, "url": avatar.url} for avatar in Avatar.objects.filter(base=base).order_by('mood__name')]
     } for base in AvatarBase.objects.all()]
 
 @require_GET
