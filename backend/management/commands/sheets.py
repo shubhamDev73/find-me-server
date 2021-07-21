@@ -19,7 +19,7 @@ class Command(GoogleCommand):
 
             Adjective.objects.all().delete()
 
-            self.insert_data(Adjective, {'id': kwargs['id'], 'sheet': kwargs['sheet']},
+            self.insert_data({'id': kwargs['id'], 'sheet': kwargs['sheet']}, Adjective,
             {
                 'name': 0,
                 'trait': lambda row: Trait[row[1]],
@@ -32,7 +32,7 @@ class Command(GoogleCommand):
 
             for i in range(10):
                 self.stdout.write(self.style.SUCCESS(f"Quesition #{i + 1}"))
-                self.insert_data(Question, {'id': kwargs['id'], 'sheet': kwargs['sheet']},
+                self.insert_data({'id': kwargs['id'], 'sheet': kwargs['sheet']}, Question,
                 {
                     'interest': lambda row: Interest.objects.get_or_create(name=row[0])[0],
                     'text': i + 1,
@@ -43,7 +43,7 @@ class Command(GoogleCommand):
 
     def insert_data(self, spreadsheet, model, indices, unique_field):
 
-        data = self.get_data(spreadsheet['id'], spreadsheet['name'])
+        data = self.get_data(spreadsheet['id'], spreadsheet['sheet'])
 
         for index, row in enumerate(data):
             if not index:
