@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 
 from .models import *
@@ -13,7 +14,6 @@ class BaseModelAdmin(admin.ModelAdmin):
         return format_html(f'<a href="{url}" target="_blank">{url}</a>')
 
     def get_image(self, url):
-        print("Image?")
         return format_html(f'<a href="{url}" target="_blank"><img src="{url}" alt="{url}" height="100"></a>')
 
     def get_fields(self, request, obj=None):
@@ -45,6 +45,14 @@ class UserInfoModelAdmin(InfoModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+@admin.register(User)
+class NewUserAdmin(UserAdmin):
+    def expire_tokens(self, request, queryset):
+        queryset.update(expired=True, fcm_token='')
+    expire_tokens.short_description = 'Expire auth tokens'
+
+    actions = [expire_tokens]
+
 class AvatarBaseListFilter(admin.SimpleListFilter):
     title = 'avatar'
     parameter_name = 'avatar__base__name'
@@ -59,7 +67,7 @@ class AvatarBaseListFilter(admin.SimpleListFilter):
             return queryset
 
 @admin.register(Profile)
-class ProfileAdmin(InfoModelAdmin):
+class ProfileAdmin(UserInfoModelAdmin):
 
     def mood(self, obj):
         return str(obj.avatar.mood)
@@ -70,16 +78,9 @@ class ProfileAdmin(InfoModelAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
-    readonly_fields = ['user', 'personality', 'last_questionnaire_time', 'base_avatar', 'mood']
-    fields = list_display = readonly_fields + ['expired']
-    list_filter = [AvatarBaseListFilter, 'avatar__mood', 'expired']
+    list_display = ['user', 'personality', 'last_questionnaire_time', 'base_avatar', 'mood']
+    list_filter = [AvatarBaseListFilter, 'avatar__mood']
     search_fields = ['user__username', 'avatar__base__name', 'avatar__mood__name']
-
-    def expire_tokens(self, request, queryset):
-        queryset.update(expired=True, fcm_token='')
-    expire_tokens.short_description = 'Expire auth tokens'
-
-    actions = [expire_tokens]
 
 @admin.register(Personality)
 class PersonalityAdmin(BaseModelAdmin):

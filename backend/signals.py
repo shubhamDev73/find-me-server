@@ -11,7 +11,7 @@ from . import firebase
 def create_user_profile(sender, instance, created, **kwargs):
     if created and not instance.is_staff:
         profile = Profile.objects.create(user=instance)
-        profile.new_token()
+        instance.new_token()
 
         t = threading.Thread(target=call_command, args=("ml", ), kwargs={"id": profile.id, "train": True})
         t.setDaemon(True)

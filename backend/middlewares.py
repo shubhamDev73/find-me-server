@@ -3,7 +3,7 @@ from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from django.urls import reverse
 
-from .models import Profile
+from .models import User
 
 
 class PostJsonMiddleware:
@@ -32,13 +32,13 @@ class AuthTokenMiddleware(MiddlewareMixin):
                 if len(splits) == 2 and splits[0] == "":
                     token = splits[1]
                     try:
-                        profile = Profile.objects.get(token=token)
-                        if profile.expired:
+                        user = User.objects.get(token=token)
+                        if user.expired:
                             response['error'] = 'Auth token expired.'
                             code = 401
                         else:
-                            request.profile = profile
-                    except Profile.DoesNotExist:
+                            request.profile = user.profile
+                    except User.DoesNotExist:
                         response['error'] = 'Invalid auth token.'
                         code = 403
                 else:

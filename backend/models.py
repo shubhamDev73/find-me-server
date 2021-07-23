@@ -2,10 +2,11 @@ import os
 import numpy as np
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator,  get_available_image_extensions, FileExtensionValidator
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from algo.parameters import *
 
@@ -90,17 +91,33 @@ class Avatar(models.Model):
     def __str__(self):
         return f"{str(self.base)} ({str(self.mood)})"
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    token = models.CharField(max_length=64)
+class User(AbstractUser):
+    token = models.CharField(max_length=64, blank=True)
     expired = models.BooleanField(default=False)
-    avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
-    _personality = models.CharField(max_length=NUM_FACETS * FLOAT_PRECISION, default='0' * NUM_FACETS * FLOAT_PRECISION)
-    last_questionnaire_time = models.DateTimeField(null=True)
+    external_ids = models.CharField(max_length=500, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    otp = models.CharField(max_length=100, blank=True)
+    verified = models.BooleanField(default=False)
     fcm_token = models.CharField(max_length=200, blank=True)
-
-    def __str__(self):
-        return str(self.user)
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name=_('groups'),
+        blank=True,
+        help_text=_(
+            'The groups this user belongs to. A user will get all permissions '
+            'granted to each of their groups.'
+        ),
+        related_name="backend_user_set",
+        related_query_name="backend_user",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_('user permissions'),
+        blank=True,
+        help_text=_('Specific permissions for this user.'),
+        related_name="backend_user_set",
+        related_query_name="backend_user",
+    )
 
     def new_token(self):
         import secrets
@@ -108,14 +125,23 @@ class Profile(models.Model):
         while True:
             try:
                 token = secrets.token_hex(32)
-                Profile.objects.get(token=token)
-            except Profile.DoesNotExist:
+                User.objects.get(token=token)
+            except User.DoesNotExist:
                 break
 
         self.token = token
         self.expired = False
         self.save()
         return self
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
+    _personality = models.CharField(max_length=NUM_FACETS * FLOAT_PRECISION, default='0' * NUM_FACETS * FLOAT_PRECISION)
+    last_questionnaire_time = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return str(self.user)
 
     def personality_representation(self, personality, indices):
         elements = Personality.objects.order_by('trait')

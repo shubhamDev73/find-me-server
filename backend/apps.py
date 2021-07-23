@@ -15,7 +15,7 @@ class BackendConfig(AppConfig):
                              on_access_pre_save,\
                              on_access_save
 
-        post_save.connect(create_user_profile, sender='auth.User')
+        post_save.connect(create_user_profile, sender='backend.User')
         post_delete.connect(delete_model, sender='backend.Profile')
         post_save.connect(delete_zero_interest, sender='backend.UserInterest')
         pre_save.connect(UpdateAccessTime.update_time, sender='backend.Access')

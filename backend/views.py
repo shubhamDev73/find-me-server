@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -49,7 +48,7 @@ def register(request):
         try:
             validate_password(request.data['password'], user)
             auth_login(request, user)
-            token = user.profile.token
+            token = user.token
         except ValidationError as e:
             error = '\n'.join(list(e))
             user.delete()
@@ -65,18 +64,18 @@ def login(request):
     user = authenticate(username=request.data['username'], password=request.data['password'])
     if user is not None:
         auth_login(request, user)
-        if user.profile.expired:
-            user.profile.new_token()
-        token = user.profile.token
+        if user.expired:
+            user.new_token()
+        token = user.token
     else:
         error = 'Invalid credentials.'
     return {'token': token, 'error': error}
 
 @require_POST
 def logout(request):
-    request.profile.expired = True
-    request.profile.fcm_token = ''
-    request.profile.save()
+    request.profile.user.expired = True
+    request.profile.user.fcm_token = ''
+    request.profile.user.save()
 
 @require_GET
 def me(request):
