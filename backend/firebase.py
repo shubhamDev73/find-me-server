@@ -66,14 +66,14 @@ def create_connect_state(connect):
         'typing': False,
     })
 
-def send_notification(profile, notification_dict, type):
+def send_notification(profile, notification_dict, **data):
     try:
         notification = messaging.Notification(**notification_dict)
 
         android_notification = messaging.AndroidNotification(**notification_dict, click_action='FLUTTER_NOTIFICATION_CLICK')
-        android = messaging.AndroidConfig(notification=android_notification, data={'type': type})
+        android = messaging.AndroidConfig(notification=android_notification, data=data)
 
-        message = messaging.Message(notification=notification, android=android, data={'type': type}, token=profile.user.fcm_token)
+        message = messaging.Message(notification=notification, android=android, data=data, token=profile.user.fcm_token)
 
         messaging.send(message)
     except:

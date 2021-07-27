@@ -429,3 +429,27 @@ def notification_token(request):
         request.profile.user.save()
     else:
         return {'error': 'No fcm token specified.'}
+
+@require_POST
+def notification_send(request):
+    if (type := request.data.get('type')) and (id := request.data.get('id')):
+        if type == 'chat':
+            try:
+                connect = Connect.objects.get(active=True, id=id)
+            except Connect.DoesNotExist:
+                return {'error': 'Connect not found.', 'code': 404}
+
+            profile = None
+            if connect.user1 == request.profile:
+                profile = connect.user2
+            if connect.user1 == request.profile:
+                profile = connect.user2
+
+            if profile is None:
+                return {'error': 'Connect not found.', 'code': 404}
+
+            firebase.send_notification(profile, {'title': 'New chat message', 'body': request.data.get('message', '')}, type='Chat', id=str(id))
+        else:
+            return {'error': 'Invalid type.', 'code': 400}
+    else:
+        return {'error': 'Some required parameters missing.', 'code': 400}

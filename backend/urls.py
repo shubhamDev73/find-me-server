@@ -68,6 +68,7 @@ urls_found = [
 
 urls_notification = [
     path('token/', views.notification_token, name='token'),
+    path('send/', views.notification_send, name='send'),
 ]
 
 urlpatterns = [
