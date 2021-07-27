@@ -73,7 +73,7 @@ def send_notification(profile, notification_dict, type):
         android_notification = messaging.AndroidNotification(**notification_dict, click_action='FLUTTER_NOTIFICATION_CLICK')
         android = messaging.AndroidConfig(notification=android_notification, data={'type': type})
 
-        message = messaging.Message(notification=notification, android=android, data={'type': type}, token=profile.fcm_token)
+        message = messaging.Message(notification=notification, android=android, data={'type': type}, token=profile.user.fcm_token)
 
         messaging.send(message)
     except:

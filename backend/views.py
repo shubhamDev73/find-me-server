@@ -425,7 +425,7 @@ def retain(request):
 @require_POST
 def notification_token(request):
     if token := request.data.get('fcm_token'):
-        request.profile.fcm_token = token
-        request.profile.save()
+        request.profile.user.fcm_token = token
+        request.profile.user.save()
     else:
         return {'error': 'No fcm token specified.'}
