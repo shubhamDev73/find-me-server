@@ -8,6 +8,7 @@ app_name = 'api'
 urls_auth = [
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
+    path('login/external/', views.login_external, name='login_external'),
     path('logout/', views.logout, name='logout'),
 ]
 

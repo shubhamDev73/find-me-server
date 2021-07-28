@@ -11,6 +11,7 @@
 		<ul>
 			<li>/register/ : to register. data: {"username", "password"}. returns {"token"}.</li>
 			<li>/login/ : to login. data: {"username", "password"}. returns {"token"}.</li>
+			<li>/login/external/ : to login from external sources (Google, Facebook, etc.). data: {"email", "external_id": {"google"}}. returns {"token"}.</li>
 			<li>/logout/ : to logout.</li>
 		</ul>
 

@@ -72,6 +72,39 @@ def login(request):
     return {'token': token, 'error': error}
 
 @require_POST
+@auth_exempt
+def login_external(request):
+    token = None
+    error = ''
+
+    email = request.data['email']
+    external_id = request.data['external_id']
+    key = list(external_id.keys())[0]
+
+    try:
+        user = User.objects.get(email=email)
+        id = None if user.external_ids == '' else json.loads(user.external_ids).get(key, None)
+        if id is None:
+            if user.external_ids == '':
+                user.external_ids = {}
+            user.external_ids[key] = external_id[key]
+            user.save()
+            if user.expired:
+                user.new_token()
+            token = user.token
+        else:
+            if json.loads(user.external_ids)[key] == external_id[key]:
+                if user.expired:
+                    user.new_token()
+                token = user.token
+            else:
+                error = 'Invalid credentials.'
+    except User.DoesNotExist:
+        user = User.objects.create_user(email, external_ids=external_id)
+        token = user.token
+    return {'token': token, 'error': error}
+
+@require_POST
 def logout(request):
     request.profile.user.expired = True
     request.profile.user.fcm_token = ''

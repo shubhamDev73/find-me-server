@@ -47,6 +47,9 @@ class UserInfoModelAdmin(InfoModelAdmin):
 
 @admin.register(User)
 class NewUserAdmin(UserAdmin):
+
+    list_display = ['username', 'email', 'phone', 'expired']
+
     def expire_tokens(self, request, queryset):
         queryset.update(expired=True, fcm_token='')
     expire_tokens.short_description = 'Expire auth tokens'
