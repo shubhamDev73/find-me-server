@@ -475,13 +475,13 @@ def notification_send(request):
             profile = None
             if connect.user1 == request.profile:
                 profile = connect.user2
-            if connect.user1 == request.profile:
-                profile = connect.user2
+            if connect.user2 == request.profile:
+                profile = connect.user1
 
             if profile is None:
                 return {'error': 'Connect not found.', 'code': 404}
 
-            firebase.send_notification(profile, {'title': 'New chat message', 'body': request.data.get('message', '')}, type='Chat', id=str(id))
+            firebase.send_notification(profile, {'title': request.profile.user.username, 'body': request.data.get('message', '')}, type='Chat', id=str(id), display='false')
         else:
             return {'error': 'Invalid type.', 'code': 400}
     else:
