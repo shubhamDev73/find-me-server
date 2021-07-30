@@ -22,7 +22,7 @@
 				<li>/ : retrieve information about me. {"nick", "base_avatar", "avatar", "personality", "interests", "mood", "avatar_timeline"}.</li>
 				<h4>/personality/</h4>
 				<ul>
-					<li>/ : retrieve information about my personality. {"fire": {"value", "description", "url", "adjectives": [ {"name", "description"} ] }, "water", "air", "earth", "space"}.</li>
+					<li>/ : retrieve information about my personality. {"Fire": {"value", "description", "url", "adjectives": [ {"name", "description"} ] }, "Water", "Air", "Earth", "Space"}.</li>
 					<li>/update/ : (GET, POST) webhook to update personality from external form. GET: {"all", "initial"}. POST - data: { "&lt;question-text&gt;": ""&lt;answer&gt;(in range 0-5)" }.</li>
 				</ul>
 				<h4>/interests/</h4>
@@ -54,6 +54,11 @@
 			<h3>/moods/</h3>
 			<ul>
 				<li>/ : retrieve all moods. [ {"id", "name", "url"}, {},..].</li>
+			</ul>
+
+			<h3>/personality/</h3>
+			<ul>
+				<li>/ : retrieve all personality details. {"trait": {"Water": {"description", "url", "adjectives": [{"id", "name", "description", "pool"}]}}, "questionnaire": {"all", "initial"}}.</li>
 			</ul>
 
 			<h3>/find/</h3>

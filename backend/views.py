@@ -117,12 +117,12 @@ def me(request):
     return request.profile.get_info(empty_questions=True)
 
 @require_GET
-def personality(request):
+def me_personality(request):
     return request.profile.traits
 
 @require_http_methods(["GET", "POST"])
 @auth_exempt
-def personality_update(request):
+def me_personality_update(request):
     if request.method == "GET":
         all = PersonalityQuestionnaire.objects.all()
         initial = all.filter(initial=True)
@@ -311,6 +311,25 @@ def avatars(request, pk):
 @require_GET
 def moods(request):
     return [{"id": mood.id, "name": mood.name, "url": mood.url} for mood in Mood.objects.all()]
+
+@require_GET
+def personality(request):
+    all_questionnaires = PersonalityQuestionnaire.objects.all()
+    initial_questionnaires = all_questionnaires.filter(initial=True)
+
+    return {
+        "trait": {
+            personality.display_name: {
+                "description": personality.description,
+                "url": personality.get_urls(),
+                "adjectives": [{"id": adjective.id, "name": adjective.name, "description": adjective.description, "pool": adjective.pool} for adjective in Adjective.objects.filter(trait=personality.trait)],
+            } for personality in Personality.objects.all()
+        },
+        "questionnaire": {
+            "all": [obj.url for obj in all_questionnaires],
+            "initial": [obj.url for obj in initial_questionnaires],
+        },
+    }
 
 @require_GET
 def find(request):

@@ -26,13 +26,14 @@ urls_data = [
     path('interests/', include(urls_interests), name='interests'),
     path('avatars/', include(urls_avatars), name='avatars'),
     path('moods/', views.moods, name='moods'),
+    path('personality/', views.personality, name='personality'),
 ]
 
 urls_me = [
     path('', views.me, name='index'),
 
-	path('personality/', views.personality, name='personality'),
-    path('personality/update/', views.personality_update, name='personality_update'),
+    path('personality/', views.me_personality, name='personality'),
+    path('personality/update/', views.me_personality_update, name='personality_update'),
 
     path('interests/', views.me_interests, name='interests'),
     path('interests/update/', views.update_interests, name='update_interests'),
