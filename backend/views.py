@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -83,24 +85,24 @@ def login_external(request):
 
     try:
         user = User.objects.get(email=email)
-        id = None if user.external_ids == '' else json.loads(user.external_ids).get(key, None)
+        user_ids = {} if user.external_ids == '' else json.loads(user.external_ids)
+
+        id = user_ids.get(key)
         if id is None:
-            if user.external_ids == '':
-                user.external_ids = {}
-            user.external_ids[key] = external_id[key]
+            user_ids[key] = external_id[key]
+            user.external_ids = json.dumps(user_ids)
             user.save()
             if user.expired:
                 user.new_token()
             token = user.token
+        elif id == external_id[key]:
+            if user.expired:
+                user.new_token()
+            token = user.token
         else:
-            if json.loads(user.external_ids)[key] == external_id[key]:
-                if user.expired:
-                    user.new_token()
-                token = user.token
-            else:
-                error = 'Invalid credentials.'
+            error = 'Invalid credentials.'
     except User.DoesNotExist:
-        user = User.objects.create_user(email, external_ids=external_id)
+        user = User.objects.create_user(email, email=email, external_ids=json.dumps(external_id))
         token = user.token
     return {'token': token, 'error': error}
 
