@@ -65,6 +65,11 @@ def login(request):
     token = None
     error = ''
     user = authenticate(username=request.data['username'], password=request.data['password'])
+    if user is None:
+        user = authenticate(email=request.data['username'], password=request.data['password'])
+        if user is None:
+            user = authenticate(phone=request.data['username'], password=request.data['password'])
+
     if user is not None:
         auth_login(request, user)
         if user.expired:
