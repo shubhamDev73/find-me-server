@@ -47,6 +47,7 @@ def register(request):
     error = ''
     try:
         user = User.objects.create_user(request.data['username'], password=request.data['password'])
+        user.fill_details(email=request.data.get('email'), phone=request.data.get('phone'))
         try:
             validate_password(request.data['password'], user)
             auth_login(request, user)
@@ -92,6 +93,7 @@ def login_external(request):
             user_ids[key] = external_id[key]
             user.external_ids = json.dumps(user_ids)
             user.save()
+            auth_login(request, user)
             if user.expired:
                 user.new_token()
             token = user.token
@@ -103,8 +105,13 @@ def login_external(request):
             error = 'Invalid credentials.'
     except User.DoesNotExist:
         user = User.objects.create_user(email, email=email, external_ids=json.dumps(external_id))
+        auth_login(request, user)
         token = user.token
     return {'token': token, 'error': error}
+
+@require_POST
+def fill_details(request):
+    request.profile.user.fill_details(username=request.data.get('username'), email=request.data.get('email'), phone=request.data.get('phone'))
 
 @require_POST
 def logout(request):

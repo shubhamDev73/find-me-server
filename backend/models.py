@@ -134,6 +134,15 @@ class User(AbstractUser):
         self.save()
         return self
 
+    def fill_details(self, username=None, email=None, phone=None):
+        if username is not None:
+            self.username = username
+        if email is not None:
+            self.email = email
+        if phone is not None:
+            self.phone = phone
+        self.save()
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
