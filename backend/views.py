@@ -172,6 +172,11 @@ def fill_details(request):
         return {'error': 'User already exists.'}
 
 @require_POST
+def onboarded(request):
+    request.profile.onboarded = True
+    request.profile.save()
+
+@require_POST
 def logout(request):
     request.profile.user.expired = True
     request.profile.user.fcm_token = ''

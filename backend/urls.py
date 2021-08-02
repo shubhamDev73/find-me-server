@@ -10,6 +10,7 @@ urls_auth = [
     path('login/', views.login, name='login'),
     path('login/external/', views.login_external, name='login_external'),
     path('login/details/', views.fill_details, name='fill_details'),
+    path('onboarded/', views.onboarded, name='onboarded'),
     path('logout/', views.logout, name='logout'),
     path('otp/send/', views.otp_send, name='otp_send'),
     path('otp/check/', views.otp_check, name='otp_check'),
