@@ -14,6 +14,9 @@
 			<li>/login/external/ : to login from external sources (Google, Facebook, etc.). data: {"email", "external_id": {"google"}}. returns {"token"}.</li>
 			<li>/login/details/ : to fill details post login. data: {"username", "email", "phone"}.</li>
 			<li>/logout/ : to logout.</li>
+			<li>/otp/send/: to send otp. data: {"username", "email", "phone"}.</li>
+			<li>/otp/check/: to check otp. data: {"username", "email", "phone", "otp"}.</li>
+			<li>/password/reset/: to reset password. data: {"username", "email", "phone", "password"}.</li>
 		</ul>
 
 		<h2>User end-points. Require "Authorization: Bearer &lt;auth-token&gt;" as header (returns response code 403 otherwise).</h2>

@@ -2,9 +2,11 @@ import json
 
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from django.utils import timezone
+from django.core.mail import send_mail
 
 from .decorators import auth_exempt
 from .models import *
@@ -75,6 +77,9 @@ def register(request):
         try:
             validate_password(request.data['password'], user)
             auth_login(request, user)
+            user.otp = ''
+            user.verified = False
+            user.save()
             token = user.token
         except ValidationError as e:
             error = '\n'.join(list(e))
@@ -93,6 +98,9 @@ def login(request):
         user = authenticate(username=user.username, password=request.data['password'])
         if user is not None:
             auth_login(request, user)
+            user.otp = ''
+            user.verified = False
+            user.save()
             if user.expired:
                 user.new_token()
             token = user.token
@@ -121,8 +129,10 @@ def login_external(request):
         if id is None:
             user_ids[key] = external_id[key]
             user.external_ids = json.dumps(user_ids)
-            user.save()
             auth_login(request, user)
+            user.otp = ''
+            user.verified = False
+            user.save()
             if user.expired:
                 user.new_token()
             token = user.token
@@ -134,7 +144,11 @@ def login_external(request):
             error = 'Invalid credentials.'
     except User.DoesNotExist:
         user = User.objects.create_user(email, email=email, external_ids=json.dumps(external_id))
+        user.set_unusable_password()
         auth_login(request, user)
+        user.otp = ''
+        user.verified = False
+        user.save()
         token = user.token
     return {'token': token, 'error': error}
 
@@ -154,6 +168,58 @@ def logout(request):
     request.profile.user.expired = True
     request.profile.user.fcm_token = ''
     request.profile.user.save()
+
+@require_POST
+@auth_exempt
+def otp_send(request):
+    user = get_user(request)
+
+    if user is not None:
+
+        import string
+        import secrets
+        otp = ''.join(secrets.choice(string.digits) for _ in range(4))
+
+        user.otp = make_password(otp)
+        user.verified = False
+        user.save()
+
+        if user.email is not None:
+            send_mail(
+                'OTP for find.me password reset',
+                f'{otp} is the otp for your password reset request on find.me',
+                'shubham0209@gmail.com',
+                [user.email],
+                fail_silently=False,
+            )
+
+    return {'message': 'OTP sent on registered email.'}
+
+@require_POST
+@auth_exempt
+def otp_check(request):
+    user = get_user(request)
+
+    if user is not None:
+        if check_password(request.data['otp'], user.otp):
+            user.otp = ''
+            user.verified = True
+            user.save()
+            return {'message': 'Correct OTP entered.'}
+        else:
+            return {'error': 'Invalid OTP entered.'}
+
+@require_POST
+@auth_exempt
+def password_reset(request):
+    user = get_user(request)
+    if user is not None and user.verified:
+        user.verified = False
+        user.set_password(request.data['password'])
+        user.save()
+        return {'message': 'Password reset successfully.'}
+
+    return {'error': 'Password reset failed.'}
 
 @require_GET
 def me(request):

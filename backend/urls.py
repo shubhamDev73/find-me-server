@@ -11,6 +11,9 @@ urls_auth = [
     path('login/external/', views.login_external, name='login_external'),
     path('login/details/', views.fill_details, name='fill_details'),
     path('logout/', views.logout, name='logout'),
+    path('otp/send/', views.otp_send, name='otp_send'),
+    path('otp/check/', views.otp_check, name='otp_check'),
+    path('password/reset/', views.password_reset, name='password_reset'),
 ]
 
 urls_interests = [
