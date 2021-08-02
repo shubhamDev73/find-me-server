@@ -35,6 +35,26 @@ OPTION_VALUES = {
     "regularly": 5,
 }
 
+def get_user(request):
+    user = None
+    try:
+        user = User.objects.get(username=request.data['username'])
+    except:
+        try:
+            user = User.objects.get(email=request.data['username'])
+        except:
+            try:
+                user = User.objects.get(phone=request.data['username'])
+            except:
+                try:
+                    user = User.objects.get(email=request.data['email'])
+                except:
+                    try:
+                        user = User.objects.get(phone=request.data['phone'])
+                    except:
+                        user = None
+    return user
+
 @require_GET
 @auth_exempt
 def index(request):
@@ -45,7 +65,11 @@ def index(request):
 def register(request):
     token = None
     error = ''
-    try:
+
+    user = get_user(request)
+    if user is not None:
+        error = 'User already exists.'
+    else:
         user = User.objects.create_user(request.data['username'], password=request.data['password'])
         user.fill_details(email=request.data.get('email'), phone=request.data.get('phone'))
         try:
@@ -55,8 +79,7 @@ def register(request):
         except ValidationError as e:
             error = '\n'.join(list(e))
             user.delete()
-    except:
-        error = 'Username already exists.'
+
     return {'token': token, 'error': error}
 
 @require_POST
@@ -64,19 +87,20 @@ def register(request):
 def login(request):
     token = None
     error = ''
-    user = authenticate(username=request.data['username'], password=request.data['password'])
-    if user is None:
-        user = authenticate(email=request.data['username'], password=request.data['password'])
-        if user is None:
-            user = authenticate(phone=request.data['username'], password=request.data['password'])
 
+    user = get_user(request)
     if user is not None:
-        auth_login(request, user)
-        if user.expired:
-            user.new_token()
-        token = user.token
+        user = authenticate(username=user.username, password=request.data['password'])
+        if user is not None:
+            auth_login(request, user)
+            if user.expired:
+                user.new_token()
+            token = user.token
+        else:
+            error = 'Invalid credentials.'
     else:
         error = 'Invalid credentials.'
+
     return {'token': token, 'error': error}
 
 @require_POST
@@ -116,7 +140,14 @@ def login_external(request):
 
 @require_POST
 def fill_details(request):
-    request.profile.user.fill_details(username=request.data.get('username'), email=request.data.get('email'), phone=request.data.get('phone'))
+    user = get_user(request)
+    if user is None or user == request.profile.user:
+        if 'password' in request.data:
+            request.profile.user.set_password(request.data['password'])
+            request.profile.user.save()
+        request.profile.user.fill_details(username=request.data.get('username'), email=request.data.get('email'), phone=request.data.get('phone'))
+    else:
+        return {'error': 'User already exists.'}
 
 @require_POST
 def logout(request):
