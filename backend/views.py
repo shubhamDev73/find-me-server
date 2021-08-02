@@ -66,6 +66,7 @@ def index(request):
 @auth_exempt
 def register(request):
     token = None
+    onboarded = False
     error = ''
 
     user = get_user(request)
@@ -81,16 +82,18 @@ def register(request):
             user.verified = False
             user.save()
             token = user.token
+            onboarded = user.profile.onboarded
         except ValidationError as e:
             error = '\n'.join(list(e))
             user.delete()
 
-    return {'token': token, 'error': error}
+    return {'token': token, 'onboarded': onboarded, 'error': error}
 
 @require_POST
 @auth_exempt
 def login(request):
     token = None
+    onboarded = False
     error = ''
 
     user = get_user(request)
@@ -104,17 +107,19 @@ def login(request):
             if user.expired:
                 user.new_token()
             token = user.token
+            onboarded = user.profile.onboarded
         else:
             error = 'Invalid credentials.'
     else:
         error = 'Invalid credentials.'
 
-    return {'token': token, 'error': error}
+    return {'token': token, 'onboarded': onboarded, 'error': error}
 
 @require_POST
 @auth_exempt
 def login_external(request):
     token = None
+    onboarded = False
     error = ''
 
     email = request.data['email']
@@ -136,10 +141,12 @@ def login_external(request):
             if user.expired:
                 user.new_token()
             token = user.token
+            onboarded = user.profile.onboarded
         elif id == external_id[key]:
             if user.expired:
                 user.new_token()
             token = user.token
+            onboarded = user.profile.onboarded
         else:
             error = 'Invalid credentials.'
     except User.DoesNotExist:
@@ -150,7 +157,8 @@ def login_external(request):
         user.verified = False
         user.save()
         token = user.token
-    return {'token': token, 'error': error}
+        onboarded = user.profile.onboarded
+    return {'token': token, 'onboarded': onboarded, 'error': error}
 
 @require_POST
 def fill_details(request):

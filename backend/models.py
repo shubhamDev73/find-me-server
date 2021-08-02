@@ -145,7 +145,8 @@ class User(AbstractUser):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ForeignKey(Avatar, default=1, on_delete=models.PROTECT)
+    avatar = models.ForeignKey(Avatar, on_delete=models.PROTECT, null=True)
+    onboarded = models.BooleanField(default=False)
     _personality = models.CharField(max_length=NUM_FACETS * FLOAT_PRECISION, default='0' * NUM_FACETS * FLOAT_PRECISION)
     last_questionnaire_time = models.DateTimeField(null=True)
 
@@ -215,26 +216,26 @@ class Profile(models.Model):
     def get_info(self, interest_questions=True, empty_questions=False):
         return {
             "nick": self.user.username,
-            "base_avatar": self.avatar.base.name,
-            "avatar": self.avatar.url,
+            "base_avatar": self.avatar.base.name if self.avatar else None,
+            "avatar": self.avatar.url if self.avatar else None,
             "personality": self.traits,
             "interests": self.get_all_interests(questions=interest_questions, blank=empty_questions),
-            "mood": self.avatar.mood.name,
-            "avatar_timeline": self.avatar_timeline
+            "mood": self.avatar.mood.name if self.avatar else None,
+            "avatar_timeline": self.avatar_timeline if self.avatar else None,
         }
 
     def get_basic_info(self):
         return {
             "nick": self.user.username,
-            "avatar": self.avatar.url,
-            "mood": self.avatar.mood.name,
+            "avatar": self.avatar.url if self.avatar else None,
+            "mood": self.avatar.mood.name if self.avatar else None,
         }
 
     def get_partial_info(self):
         return {
-            "avatar": self.avatar.url,
+            "avatar": self.avatar.url if self.avatar else None,
             "personality": self.major_personality,
-            "mood": self.avatar.mood.name,
+            "mood": self.avatar.mood.name if self.avatar else None,
         }
 
     @property
