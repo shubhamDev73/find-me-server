@@ -121,6 +121,7 @@ def login_external(request):
     token = None
     onboarded = False
     error = ''
+    created = False
 
     email = request.data['email']
     external_id = request.data['external_id']
@@ -158,7 +159,8 @@ def login_external(request):
         user.save()
         token = user.token
         onboarded = user.profile.onboarded
-    return {'token': token, 'onboarded': onboarded, 'error': error}
+        created = True
+    return {'token': token, 'onboarded': onboarded, 'created': created, 'error': error}
 
 @require_POST
 def fill_details(request):
