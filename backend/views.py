@@ -67,6 +67,7 @@ def index(request):
 def register(request):
     token = None
     onboarded = False
+    user_id = ''
     error = ''
 
     user = get_user(request)
@@ -83,17 +84,19 @@ def register(request):
             user.save()
             token = user.token
             onboarded = user.profile.onboarded
+            user_id = str(user.id)
         except ValidationError as e:
             error = '\n'.join(list(e))
             user.delete()
 
-    return {'token': token, 'onboarded': onboarded, 'error': error}
+    return {'token': token, 'onboarded': onboarded, 'user_id': user_id, 'error': error}
 
 @require_POST
 @auth_exempt
 def login(request):
     token = None
     onboarded = False
+    user_id = ''
     error = ''
 
     user = get_user(request)
@@ -108,18 +111,20 @@ def login(request):
                 user.new_token()
             token = user.token
             onboarded = user.profile.onboarded
+            user_id = str(user.id)
         else:
             error = 'Invalid credentials.'
     else:
         error = 'Invalid credentials.'
 
-    return {'token': token, 'onboarded': onboarded, 'error': error}
+    return {'token': token, 'onboarded': onboarded, 'user_id': user_id, 'error': error}
 
 @require_POST
 @auth_exempt
 def login_external(request):
     token = None
     onboarded = False
+    user_id = ''
     error = ''
     created = False
 
@@ -143,11 +148,13 @@ def login_external(request):
                 user.new_token()
             token = user.token
             onboarded = user.profile.onboarded
+            user_id = str(user.id)
         elif id == external_id[key]:
             if user.expired:
                 user.new_token()
             token = user.token
             onboarded = user.profile.onboarded
+            user_id = str(user.id)
         else:
             error = 'Invalid credentials.'
     except User.DoesNotExist:
@@ -159,8 +166,9 @@ def login_external(request):
         user.save()
         token = user.token
         onboarded = user.profile.onboarded
+        user_id = str(user.id)
         created = True
-    return {'token': token, 'onboarded': onboarded, 'created': created, 'error': error}
+    return {'token': token, 'onboarded': onboarded, 'created': created, 'user_id': user_id, 'error': error}
 
 @require_POST
 def fill_details(request):
