@@ -68,11 +68,11 @@ def create_connect_state(connect):
 
 def send_notification(profile, notification_dict, **data):
     try:
-        notification = messaging.Notification(**notification_dict)
+        notification = messaging.Notification(**notification_dict) if notification_dict else None
 
         icon = f'http://{settings.HOST}{settings.MEDIA_URL}icon.png'
 
-        android_notification = messaging.AndroidNotification(**notification_dict, click_action='FLUTTER_NOTIFICATION_CLICK', icon=icon, priority='max')
+        android_notification = messaging.AndroidNotification(**notification_dict, click_action='FLUTTER_NOTIFICATION_CLICK', icon=icon, priority='high') if notification_dict else None
         android = messaging.AndroidConfig(notification=android_notification, data=data)
 
         message = messaging.Message(notification=notification, android=android, data=data, token=profile.user.fcm_token)

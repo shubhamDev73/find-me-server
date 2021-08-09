@@ -178,6 +178,13 @@ def fill_details(request):
             request.profile.user.set_password(request.data['password'])
             request.profile.user.save()
         request.profile.user.fill_details(username=request.data.get('username'), email=request.data.get('email'), phone=request.data.get('phone'))
+
+        if 'username' in request.data:
+            for connect in Connect.objects.filter(active=True, user1=request.profile):
+                firebase.send_notification(connect.user2, None, type='NickUpdate', id=str(connect.id), nick=request.data['username'])
+            for connect in Connect.objects.filter(active=True, user2=request.profile):
+                firebase.send_notification(connect.user1, None, type='NickUpdate', id=str(connect.id), nick=request.data['username'])
+
     else:
         return {'error': 'User already exists.'}
 
@@ -400,6 +407,12 @@ def me_avatar_update(request):
 
         request.profile.avatar = avatar
         request.profile.save()
+
+        for connect in Connect.objects.filter(active=True, user1=request.profile):
+            firebase.send_notification(connect.user2, None, type='AvatarUpdate', id=str(connect.id), base=avatar.base.name, mood=avatar.mood.name)
+        for connect in Connect.objects.filter(active=True, user2=request.profile):
+            firebase.send_notification(connect.user1, None, type='AvatarUpdate', id=str(connect.id), base=avatar.base.name, mood=avatar.mood.name)
+
     except Avatar.DoesNotExist:
         return {'error': 'Avatar not found.', 'code': 404}
 
