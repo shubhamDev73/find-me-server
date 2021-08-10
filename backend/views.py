@@ -175,8 +175,12 @@ def fill_details(request):
     user = get_user(request)
     if user is None or user == request.profile.user:
         if 'password' in request.data:
-            request.profile.user.set_password(request.data['password'])
-            request.profile.user.save()
+            if not request.profile.user.has_usable_password() or (user := authenticate(username=request.profile.user.username, password=request.data['old_password'])):
+                request.profile.user.set_password(request.data['password'])
+                request.profile.user.save()
+            else:
+                return {'error': 'Incorrect old password entered.'}
+
         request.profile.user.fill_details(username=request.data.get('username'), email=request.data.get('email'), phone=request.data.get('phone'))
 
         if 'username' in request.data:
