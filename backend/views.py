@@ -328,7 +328,7 @@ def me_personality_update(request):
                     else:
                         prev_facets[index] = value * weight + prev_facets[index] * (1 - weight)
             profile.save_facets(prev_facets)
-        firebase.send_notification(profile, {'title': 'Personality updated!', 'body': 'Your personality has been updated according to the questions you answered!'}, type='Personality')
+        firebase.send_notification(profile, {'title': 'Personality updated!', 'body': 'Your personality has been updated according to the questions you answered!'} if profile.onboarded else None, type='Personality')
 
 @require_GET
 def me_interests(request):
