@@ -47,7 +47,7 @@ def get_connect_state(connect_id, user):
             return db.reference().child(f'{ref.id}-2').get()
     return {
         'online': False,
-        'lastSeen': round(user.last_questionnaire_time.timestamp() * 1000),
+        'lastSeen': round(user.last_questionnaire_time.timestamp() * 1000) if user.last_questionnaire_time is not None else 0,
         'typing': False
     }
 

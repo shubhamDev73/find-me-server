@@ -48,7 +48,7 @@ class UserInfoModelAdmin(InfoModelAdmin):
 @admin.register(User)
 class NewUserAdmin(UserAdmin):
 
-    list_display = ['username', 'email', 'phone', 'expired']
+    list_display = ['id', 'username', 'email', 'phone', 'expired']
 
     def expire_tokens(self, request, queryset):
         queryset.update(expired=True, fcm_token='')
@@ -73,15 +73,12 @@ class AvatarBaseListFilter(admin.SimpleListFilter):
 class ProfileAdmin(UserInfoModelAdmin):
 
     def mood(self, obj):
-        return str(obj.avatar.mood)
+        return str(obj.avatar.mood) if obj.avatar else None
 
     def base_avatar(self, obj):
-        return str(obj.avatar.base)
+        return str(obj.avatar.base) if obj.avatar else None
 
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    list_display = ['user', 'personality', 'last_questionnaire_time', 'base_avatar', 'mood']
+    list_display = fields = ['user', 'personality', 'last_questionnaire_time', 'base_avatar', 'mood', 'onboarded']
     list_filter = [AvatarBaseListFilter, 'avatar__mood']
     search_fields = ['user__username', 'avatar__base__name', 'avatar__mood__name']
 
@@ -127,7 +124,7 @@ class InterestAdmin(BaseModelAdmin):
 @admin.register(UserInterest)
 class UserInterestAdmin(UserInfoModelAdmin):
 
-    list_display = ['user', 'interest', 'amount']
+    list_display = ['user', 'interest', 'amount', 'last_change']
     list_filter = ['interest', 'amount', 'user']
     search_fields = ['user__username', 'interest__name']
 
@@ -239,7 +236,7 @@ class ConnectAdmin(InfoModelAdmin):
         queryset.update(active=False)
     expire_connect.short_description = 'Expire connects'
 
-    readonly_fields = ['id', 'user1', 'user2', 'chat_id', 'create_time', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
+    readonly_fields = ['id', 'user1', 'user2', 'chat_id', 'create_time', 'block', 'retained1', 'retain1_time', 'retained2', 'retain2_time', 'retained', 'retain_time']
     fields = ['active'] + readonly_fields
     list_display = readonly_fields + ['active']
     add_fields = ['user1', 'user2', 'active']

@@ -404,6 +404,7 @@ class Connect(models.Model):
     last_read_time1 = models.DateTimeField(auto_now_add=True)
     last_read_time2 = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
+    block = models.SmallIntegerField(null=True)
 
     retained1 = models.BooleanField(default=False)
     retained2 = models.BooleanField(default=False)

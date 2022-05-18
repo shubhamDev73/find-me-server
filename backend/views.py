@@ -564,8 +564,9 @@ def accept(request):
 
 @require_GET
 def found(request):
-    connects = [(connect, 1) for connect in Connect.objects.filter(active=True).filter(user1=request.profile)]
-    connects += [(connect, 2) for connect in Connect.objects.filter(active=True).filter(user2=request.profile)]
+    active_connects = Connect.objects.filter(active=True).filter(block=None)
+    connects = [(connect, 1) for connect in active_connects.filter(user1=request.profile)]
+    connects += [(connect, 2) for connect in active_connects.filter(user2=request.profile)]
     return [{**(connect.user2 if me == 1 else connect.user1).get_basic_info(), **{
         "id": connect.id,
         "timestamp": connect.create_time,
@@ -580,7 +581,7 @@ def found(request):
 @require_POST
 def found_read(request):
     try:
-        connect = Connect.objects.get(active=True, pk=request.data['id'])
+        connect = Connect.objects.get(active=True, block=None, pk=request.data['id'])
         time = timezone.now()
         if connect.user1 == request.profile and time > connect.last_read_time1:
             connect.last_read_time1 = time
@@ -597,20 +598,19 @@ def found_read(request):
 @require_GET
 def found_view(request, pk):
     try:
-        connect = Connect.objects.get(pk=pk)
-        if connect.active:
-            if connect.user1 == request.profile:
-                return connect.user2.get_info(empty_questions=True)
-            if connect.user2 == request.profile:
-                return connect.user1.get_info(empty_questions=True)
+        connect = Connect.objects.get(active=True, block=None, pk=pk)
+        if connect.user1 == request.profile:
+            return connect.user2.get_info(empty_questions=True)
+        if connect.user2 == request.profile:
+            return connect.user1.get_info(empty_questions=True)
     except Connect.DoesNotExist:
         pass
     return {'error': 'User not found.', 'code': 404}
 
 @require_POST
-def retain(request):
+def found_retain(request):
     try:
-        connect = Connect.objects.get(active=True, pk=request.data['id'])
+        connect = Connect.objects.get(active=True, block=None, pk=request.data['id'])
         if connect.retained():
             return {'error': 'User already retained.'}
         if connect.user1 == request.profile:
@@ -630,6 +630,22 @@ def retain(request):
     return {'error': 'Connect not found.', 'code': 404}
 
 @require_POST
+def found_block(request):
+    try:
+        connect = Connect.objects.get(active=True, block=None, pk=request.data['id'])
+        if connect.user1 == request.profile:
+            connect.block = 1
+            connect.save()
+            return
+        if connect.user2 == request.profile:
+            connect.block = 2
+            connect.save()
+            return
+    except Connect.DoesNotExist:
+        pass
+    return {'error': 'User not found.', 'code': 404}
+
+@require_POST
 def notification_token(request):
     if token := request.data.get('fcm_token'):
         request.profile.user.fcm_token = token
@@ -642,7 +658,7 @@ def notification_send(request):
     if (type := request.data.get('type')) and (id := request.data.get('id')):
         if type == 'chat':
             try:
-                connect = Connect.objects.get(active=True, id=id)
+                connect = Connect.objects.get(active=True, block=None, id=id)
             except Connect.DoesNotExist:
                 return {'error': 'Connect not found.', 'code': 404}
 

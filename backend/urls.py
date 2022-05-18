@@ -70,7 +70,8 @@ urls_found = [
     path('', views.found, name='index'),
     path('<int:pk>/', views.found_view, name='view'),
     path('read/', views.found_read, name='read'),
-    path('retain/', views.retain, name='retain'),
+    path('retain/', views.found_retain, name='retain'),
+    path('block/', views.found_block, name='block'),
 ]
 
 urls_notification = [
